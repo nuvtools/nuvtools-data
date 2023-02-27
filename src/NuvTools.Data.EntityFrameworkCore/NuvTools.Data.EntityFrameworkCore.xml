@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>NuvTools.Data.EntityFrameworkCore</name>
+    </assembly>
+    <members>
+        <member name="P:NuvTools.Data.EntityFrameworkCore.Design.DesignTimeDbContextFactoryBase`1.Configuration">
+            <summary>
+            Contains the configuration settings loaded from files.
+            <para><seealso cref="M:NuvTools.Data.EntityFrameworkCore.Design.DesignTimeDbContextFactoryBase`1.InitializeConfiguration(Microsoft.Extensions.Configuration.Json.JsonConfigurationSource[])"/></para>
+            </summary>
+        </member>
+        <member name="M:NuvTools.Data.EntityFrameworkCore.Design.DesignTimeDbContextFactoryBase`1.InitializeConfiguration(Microsoft.Extensions.Configuration.Json.JsonConfigurationSource[])">
+            <summary>
+            Allows initialize the Configuration settings for later use.
+            </summary>
+            <param name="files">Json file to be added into Configuration settings. Note: The base path is set to the current directory application.</param>
+        </member>
+        <member name="M:NuvTools.Data.EntityFrameworkCore.Extensions.DbContextExtensions.ExecuteResilientTransactionAsync(Microsoft.EntityFrameworkCore.DbContext,System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            Executes action inside of Execution Strategy and Transaction. Note: Required when use EnableRetryOnFailure option.
+            <para>
+            <see href="https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency" />
+            </para>
+            </summary>
+            <param name="context"></param>
+            <param name="action"></param>
+            <returns></returns>
+        </member>
+        <member name="M:NuvTools.Data.EntityFrameworkCore.Extensions.DbContextExtensions.ExecuteStrategyAsync(Microsoft.EntityFrameworkCore.DbContext,System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            Executes action inside of Execution Strategy.
+            <para>
+            <see href="https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency" />
+            </para>
+            </summary>
+            <param name="context"></param>
+            <param name="action"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

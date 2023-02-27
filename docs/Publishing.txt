@@ -1,0 +1,3 @@
+nuget.exe push -Source "nuvtools" -ApiKey az NuvTools.Data.7.0.0.nupkg
+nuget.exe push -Source "nuvtools" -ApiKey az NuvTools.Data.EntityFrameworkCore.7.0.0.nupkg
+nuget.exe push -Source "nuvtools" -ApiKey az NuvTools.Data.EntityFrameworkCore.SqlServer.7.0.0.nupkg
