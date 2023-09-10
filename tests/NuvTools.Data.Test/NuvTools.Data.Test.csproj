@@ -6,7 +6,7 @@
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2023 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuv.tools</PackageProjectUrl>
-		<Version>7.0.1</Version>
+		<Version>7.1.0</Version>
 		<SignAssembly>true</SignAssembly>
 		<AssemblyOriginatorKeyFile>NuvTools.Data.Test.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
@@ -14,7 +14,7 @@
 	<ItemGroup>
 		<PackageReference Include="NUnit" Version="3.13.3" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
 	</ItemGroup>
 
 </Project>
