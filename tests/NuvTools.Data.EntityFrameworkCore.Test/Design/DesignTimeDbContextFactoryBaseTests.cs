@@ -7,11 +7,8 @@ using System;
 
 namespace NuvTools.Data.EntityFrameworkCore.Test.Design;
 
-public class NuvToolsContext : DbContext
+public class NuvToolsContext(DbContextOptions options) : DbContext(options)
 {
-    public NuvToolsContext(DbContextOptions options) : base(options)
-    {
-    }
 }
 
 public class DesignTimeDbContextFactory : DesignTimeDbContextFactoryBase<NuvToolsContext>
@@ -23,7 +20,7 @@ public class DesignTimeDbContextFactory : DesignTimeDbContextFactoryBase<NuvTool
 
         InitializeConfiguration(new JsonConfigurationSource { Path = "appsettings.json" });
 
-        Assert.AreEqual(Configuration.GetConnectionString("Default"), "It works!");
+        Assert.That(Configuration.GetConnectionString("Default") == "It works!");
 
         return new NuvToolsContext(optionsBuilder.Options);
     }
@@ -39,6 +36,6 @@ public class DesignTimeDbContextFactoryBaseTests
 
         var context = factory.CreateDbContext(null);
 
-        Assert.IsNotNull(context);
+        Assert.That(context is not null);
     }
 }
