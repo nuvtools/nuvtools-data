@@ -9,7 +9,7 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>NuvTools.Data.EntityFrameworkCore.snk</AssemblyOriginatorKeyFile>
 		<Description>Library containg helpers to manipulate data using Entity Framework Core.</Description>
-		<Version>8.0.2</Version>
+		<Version>8.0.3</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -45,7 +45,7 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.16" Condition="'$(TargetFramework)' == 'net6' Or '$(TargetFramework)' == 'net7'" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" Condition="'$(TargetFramework)' == 'net8'" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
-		<PackageReference Include="NuvTools.Common" Version="8.0.0" />
+		<PackageReference Include="NuvTools.Common" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
