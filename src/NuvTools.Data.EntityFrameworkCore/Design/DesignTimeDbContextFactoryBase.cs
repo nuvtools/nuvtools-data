@@ -13,7 +13,7 @@ public abstract class DesignTimeDbContextFactoryBase<TContext> :
     /// Contains the configuration settings loaded from files.
     /// <para><seealso cref="InitializeConfiguration(JsonConfigurationSource[])"/></para>
     /// </summary>
-    protected IConfiguration Configuration { get; private set; }
+    protected IConfiguration? Configuration { get; private set; }
 
     /// <summary>
     /// Allows initialize the Configuration settings for later use.
@@ -27,7 +27,7 @@ public abstract class DesignTimeDbContextFactoryBase<TContext> :
         foreach (var path in files)
             builder.AddJsonFile((a) =>
             {
-                a.Path = path.Path;
+                a.Path = path.Path!;
                 a.Optional = path.Optional;
                 a.ReloadOnChange = path.ReloadOnChange;
                 a.ReloadDelay = path.ReloadDelay;

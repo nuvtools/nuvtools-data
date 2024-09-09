@@ -2,9 +2,9 @@
 
 public abstract record PagingBase<T, R> where T : IEnumerable<R>
 {
-    public int PageNumber { get; set; }
+    public required int PageNumber { get; set; }
 
-    public int Total { get; set; }
+    public required int Total { get; set; }
 
-    public T List { get; set; }
+    public required T List { get; set; }
 }

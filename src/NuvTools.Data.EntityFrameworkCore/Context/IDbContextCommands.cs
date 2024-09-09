@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore.Storage;
 using NuvTools.Common.ResultWrapper;
 
 namespace NuvTools.Data.EntityFrameworkCore.Context;
@@ -14,7 +13,7 @@ public interface IDbContextCommands
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
-    IDbContextTransaction CurrentTransaction { get; }
+    IDbContextTransaction? CurrentTransaction { get; }
 
     Task<IResult<TKey>> AddAndSaveAsync<TEntity, TKey>(TEntity entity) where TEntity : class;
 

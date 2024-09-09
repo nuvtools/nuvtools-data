@@ -4,7 +4,6 @@ namespace NuvTools.Data.Sorting;
 
 public static class SortingExtensions
 {
-
     public enum SortDirection
     {
         ASC = 0,

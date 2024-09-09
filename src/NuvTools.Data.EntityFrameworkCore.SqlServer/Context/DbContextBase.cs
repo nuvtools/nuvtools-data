@@ -21,25 +21,25 @@ public abstract class DbContextBase : DbContext, IDbContextCommands
         return Database.RollbackTransactionAsync(cancellationToken);
     }
 
-    public IDbContextTransaction CurrentTransaction { get { return Database.CurrentTransaction; } }
+    public IDbContextTransaction? CurrentTransaction { get { return Database.CurrentTransaction; } }
 
     public Task<IResult<TKey>> AddAndSaveAsync<TEntity, TKey>(TEntity entity) where TEntity : class
     {
-        return NuvTools.Data.EntityFrameworkCore.Extensions.DbContextExtensions.AddAndSaveAsync<TEntity, TKey>(this, entity);
+        return EntityFrameworkCore.Extensions.DbContextExtensions.AddAndSaveAsync<TEntity, TKey>(this, entity);
     }
 
     public Task<IResult> UpdateAndSaveAsync<TEntity>(TEntity entity, params object[] keyValues) where TEntity : class
     {
-        return NuvTools.Data.EntityFrameworkCore.Extensions.DbContextExtensions.UpdateAndSaveAsync(this, entity);
+        return EntityFrameworkCore.Extensions.DbContextExtensions.UpdateAndSaveAsync(this, entity);
     }
 
     public Task<IResult> RemoveAndSaveAsync<TEntity>(params object[] keyValues) where TEntity : class
     {
-        return NuvTools.Data.EntityFrameworkCore.Extensions.DbContextExtensions.RemoveAndSaveAsync<TEntity>(this, keyValues);
+        return EntityFrameworkCore.Extensions.DbContextExtensions.RemoveAndSaveAsync<TEntity>(this, keyValues);
     }
 
     public Task<IResult<object[]>> AddAndSaveWithCompositeKeyAsync<TEntity>(TEntity entity) where TEntity : class
     {
-        return NuvTools.Data.EntityFrameworkCore.Extensions.DbContextExtensions.AddAndSaveWithCompositeKeyAsync<TEntity>(this, entity);
+        return EntityFrameworkCore.Extensions.DbContextExtensions.AddAndSaveWithCompositeKeyAsync(this, entity);
     }
 }

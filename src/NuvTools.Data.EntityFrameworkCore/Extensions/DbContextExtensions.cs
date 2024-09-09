@@ -1,14 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NuvTools.Common.ResultWrapper;
+using NuvTools.Common.Strings;
 
 namespace NuvTools.Data.EntityFrameworkCore.Extensions;
 
 public static class DbContextExtensions
 {
+    private const string ENTITY_WITH_KEYS_NOT_FOUND = "Entity with keys {0} not found.";
+
     public static async Task<IResult<TKey>> AddAndSaveAsync<TEntity, TKey>(this DbContext context, TEntity entity) where TEntity : class
     {
         var result = await context.AddAndSaveWithCompositeKeyAsync(entity);
-        return Result<TKey>.Success((TKey)result.Data[0]);
+        return Result<TKey>.Success((TKey)result.Data![0]);
     }
 
     public static async Task<IResult<object[]>> AddAndSaveWithCompositeKeyAsync<TEntity>(this DbContext context, TEntity entity) where TEntity : class
@@ -29,20 +32,22 @@ public static class DbContextExtensions
     public static object[] FindPrimaryKeyValues<TEntity>(this DbContext context, TEntity entity) where TEntity : class
     {
         var entry = context.Entry(entity);
-        object[] keys = entry.Metadata.FindPrimaryKey()
+
+        object[] keyValues = entry.Metadata.FindPrimaryKey()!
                      .Properties
-                     .Select(p => entry.Property(p.Name).CurrentValue)
+                     .Select(p => entry.Property(p.Name).CurrentValue!)
                      .ToArray();
 
-        return keys;
+        return keyValues;
     }
 
     public static async Task<IResult> UpdateAndSaveAsync<TEntity>(this DbContext context, TEntity entity, params object[] keyValues) where TEntity : class
     {
         try
         {
-            var exist = await context.Set<TEntity>().FindAsync(keyValues);
-            context.Entry(exist).CurrentValues.SetValues(entity);
+            var existingItem = await context.Set<TEntity>().FindAsync(keyValues);
+            if (existingItem is null) throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
+            context.Entry(existingItem).CurrentValues.SetValues(entity);
             await context.SaveChangesAsync();
 
             return Result.Success();
@@ -57,8 +62,9 @@ public static class DbContextExtensions
     {
         try
         {
-            var exist = await context.Set<TEntity>().FindAsync(keyValues);
-            context.Set<TEntity>().Remove(exist);
+            var existingItem = await context.Set<TEntity>().FindAsync(keyValues);
+            if (existingItem is null) throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
+            context.Set<TEntity>().Remove(existingItem);
 
             await context.SaveChangesAsync();
 

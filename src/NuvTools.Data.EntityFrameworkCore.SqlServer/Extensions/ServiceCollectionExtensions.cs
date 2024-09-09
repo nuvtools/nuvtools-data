@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         string connectionName,
         string settingsFileName = "appsettings.json",
-        Action<SqlServerDbContextOptionsBuilder> sqlServerOptionsAction = null,
+        Action<SqlServerDbContextOptionsBuilder>? sqlServerOptionsAction = null,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
         IConfiguration configuration = GetConfiguration(settingsFileName);
@@ -42,7 +42,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         IConfiguration configuration,
         string connectionName,
-        Action<SqlServerDbContextOptionsBuilder> sqlServerOptionsAction = null,
+        Action<SqlServerDbContextOptionsBuilder>? sqlServerOptionsAction = null,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
         return services.AddDatabase<TContext>(configuration.GetConnectionString(connectionName), sqlServerOptionsAction, contextLifetime);
@@ -50,8 +50,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddDatabase<TContext>(
         this IServiceCollection services,
-        string connectionString,
-        Action<SqlServerDbContextOptionsBuilder> sqlServerOptionsAction = null,
+        string? connectionString,
+        Action<SqlServerDbContextOptionsBuilder>? sqlServerOptionsAction = null,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
         return services

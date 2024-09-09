@@ -22,10 +22,10 @@ public static class PagingExtensions
 
     public static PagingWithEnumerableList<T> ToPagingEnumerable<T>(this PagingWithQueryableList<T> paging)
     {
-        if (paging is null) throw new ArgumentNullException(nameof(paging));
+        ArgumentNullException.ThrowIfNull(paging);
         return new PagingWithEnumerableList<T>
         {
-            List = paging.List.ToList(),
+            List = [.. paging.List],
             PageNumber = paging.PageNumber,
             Total = paging.Total
         };
