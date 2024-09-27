@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore;
 using NuvTools.Common.ResultWrapper;
-using NuvTools.Data.EntityFrameworkCore.Context;
 
-namespace NuvTools.Data.EntityFrameworkCore.SqlServer.Context;
+namespace NuvTools.Data.EntityFrameworkCore.Context;
 
 public abstract class DbContextBase : DbContext, IDbContextCommands
 {
@@ -25,21 +24,21 @@ public abstract class DbContextBase : DbContext, IDbContextCommands
 
     public Task<IResult<TKey>> AddAndSaveAsync<TEntity, TKey>(TEntity entity) where TEntity : class
     {
-        return EntityFrameworkCore.Extensions.DbContextExtensions.AddAndSaveAsync<TEntity, TKey>(this, entity);
+        return Extensions.DbContextExtensions.AddAndSaveAsync<TEntity, TKey>(this, entity);
     }
 
     public Task<IResult> UpdateAndSaveAsync<TEntity>(TEntity entity, params object[] keyValues) where TEntity : class
     {
-        return EntityFrameworkCore.Extensions.DbContextExtensions.UpdateAndSaveAsync(this, entity);
+        return Extensions.DbContextExtensions.UpdateAndSaveAsync(this, entity);
     }
 
     public Task<IResult> RemoveAndSaveAsync<TEntity>(params object[] keyValues) where TEntity : class
     {
-        return EntityFrameworkCore.Extensions.DbContextExtensions.RemoveAndSaveAsync<TEntity>(this, keyValues);
+        return Extensions.DbContextExtensions.RemoveAndSaveAsync<TEntity>(this, keyValues);
     }
 
     public Task<IResult<object[]>> AddAndSaveWithCompositeKeyAsync<TEntity>(TEntity entity) where TEntity : class
     {
-        return EntityFrameworkCore.Extensions.DbContextExtensions.AddAndSaveWithCompositeKeyAsync(this, entity);
+        return Extensions.DbContextExtensions.AddAndSaveWithCompositeKeyAsync(this, entity);
     }
 }
