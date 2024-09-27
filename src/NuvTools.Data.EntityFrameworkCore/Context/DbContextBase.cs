@@ -6,6 +6,13 @@ namespace NuvTools.Data.EntityFrameworkCore.Context;
 
 public abstract class DbContextBase : DbContext, IDbContextCommands
 {
+    protected DbContextBase()
+    {
+    }
+
+    protected DbContextBase(DbContextOptions options) : base(options)
+    {
+    }
 
     public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
