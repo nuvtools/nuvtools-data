@@ -36,7 +36,7 @@ public abstract class DbContextBase : DbContext, IDbContextCommands
 
     public Task<IResult> UpdateAndSaveAsync<TEntity>(TEntity entity, params object[] keyValues) where TEntity : class
     {
-        return Extensions.DbContextExtensions.UpdateAndSaveAsync(this, entity);
+        return Extensions.DbContextExtensions.UpdateAndSaveAsync(this, entity, keyValues);
     }
 
     public Task<IResult> RemoveAndSaveAsync<TEntity>(params object[] keyValues) where TEntity : class

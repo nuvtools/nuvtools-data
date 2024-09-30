@@ -7,6 +7,7 @@ namespace NuvTools.Data.EntityFrameworkCore.Extensions;
 public static class DbContextExtensions
 {
     private const string ENTITY_WITH_KEYS_NOT_FOUND = "Entity with keys {0} not found.";
+    private const string AT_LEAST_ONE_KEY_MUST_BE_PROVIDED = "At least one key value must be provided.";
 
     public static async Task<IResult<TKey>> AddAndSaveAsync<TEntity, TKey>(this DbContext context, TEntity entity) where TEntity : class
     {
@@ -43,10 +44,13 @@ public static class DbContextExtensions
 
     public static async Task<IResult> UpdateAndSaveAsync<TEntity>(this DbContext context, TEntity entity, params object[] keyValues) where TEntity : class
     {
+        if (keyValues is null || keyValues.Length == 0)
+            return Result.ValidationFail(AT_LEAST_ONE_KEY_MUST_BE_PROVIDED);
+
         try
         {
-            var existingItem = await context.Set<TEntity>().FindAsync(keyValues);
-            if (existingItem is null) throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
+            var existingItem = await context.Set<TEntity>().FindAsync(keyValues) 
+                                ?? throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
             context.Entry(existingItem).CurrentValues.SetValues(entity);
             await context.SaveChangesAsync();
 
@@ -60,10 +64,13 @@ public static class DbContextExtensions
 
     public static async Task<IResult> RemoveAndSaveAsync<TEntity>(this DbContext context, params object[] keyValues) where TEntity : class
     {
+        if (keyValues is null || keyValues.Length == 0)
+            return Result.ValidationFail(AT_LEAST_ONE_KEY_MUST_BE_PROVIDED);
+
         try
         {
-            var existingItem = await context.Set<TEntity>().FindAsync(keyValues);
-            if (existingItem is null) throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
+            var existingItem = await context.Set<TEntity>().FindAsync(keyValues) 
+                                ?? throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
             context.Set<TEntity>().Remove(existingItem);
 
             await context.SaveChangesAsync();
