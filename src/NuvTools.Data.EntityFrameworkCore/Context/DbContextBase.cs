@@ -4,7 +4,7 @@ using NuvTools.Common.ResultWrapper;
 
 namespace NuvTools.Data.EntityFrameworkCore.Context;
 
-public abstract class DbContextBase : DbContext, IDbContextCommands
+public abstract class DbContextBase : DbContext, IDbContextCommands, IDbContextWithListCommands
 {
     protected DbContextBase()
     {
@@ -47,5 +47,26 @@ public abstract class DbContextBase : DbContext, IDbContextCommands
     public Task<IResult<object[]>> AddAndSaveWithCompositeKeyAsync<TEntity>(TEntity entity) where TEntity : class
     {
         return Extensions.DbContextExtensions.AddAndSaveWithCompositeKeyAsync(this, entity);
+    }
+
+    public Task<IResult> SyncFromListAsync<TEntity, TKey>(IEnumerable<TEntity> entities, Func<TEntity, TKey> keySelector, Func<TEntity, bool>? filter = null)
+        where TEntity : class
+        where TKey : notnull
+    {
+        return Extensions.DbContextWithListExtensions.SyncFromListAsync(this, entities, keySelector, filter);
+    }
+
+    public Task<IResult> AddOrUpdateFromListAsync<TEntity, TKey>(IEnumerable<TEntity> entities, Func<TEntity, TKey> keySelector, Func<TEntity, bool>? filter = null)
+        where TEntity : class
+        where TKey : notnull
+    {
+        return Extensions.DbContextWithListExtensions.AddOrUpdateFromListAsync(this, entities, keySelector, filter);
+    }
+
+    public Task<IResult> AddOrRemoveFromListAsync<TEntity, TKey>(IEnumerable<TEntity> entities, Func<TEntity, TKey> keySelector, Func<TEntity, bool>? filter = null)
+        where TEntity : class
+        where TKey : notnull
+    {
+        return Extensions.DbContextWithListExtensions.AddOrRemoveFromListAsync(this, entities, keySelector, filter);
     }
 }
