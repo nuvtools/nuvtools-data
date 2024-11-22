@@ -82,7 +82,7 @@ public static class DbContextWithListExtensions
         }
         catch (DbUpdateException ex)
         {
-            return Result.Fail(ex.Message);
+            return Result.Fail(ex);
         }
     }
 

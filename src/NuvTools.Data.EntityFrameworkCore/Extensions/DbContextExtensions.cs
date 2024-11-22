@@ -26,7 +26,7 @@ public static class DbContextExtensions
         }
         catch (DbUpdateException ex)
         {
-            return Result<object[]>.Fail(ex.Message);
+            return Result<object[]>.Fail(ex);
         }
     }
 
@@ -58,7 +58,7 @@ public static class DbContextExtensions
         }
         catch (DbUpdateException ex)
         {
-            return Result.Fail(ex.Message);
+            return Result.Fail(ex);
         }
     }
 
@@ -79,7 +79,7 @@ public static class DbContextExtensions
         }
         catch (DbUpdateException ex)
         {
-            return Result.Fail(ex.Message);
+            return Result.Fail(ex);
         }
     }
 
