@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NuvTools.Common.ResultWrapper;
+using System.Linq.Expressions;
 
 namespace NuvTools.Data.EntityFrameworkCore.Extensions;
 
@@ -22,7 +23,7 @@ public static class DbContextWithListExtensions
         this DbContext context,
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Func<TEntity, bool>? filter,
+        Expression<Func<TEntity, bool>>? filter,
         bool allowAdd,
         bool allowUpdate,
         bool allowRemove)
@@ -40,7 +41,7 @@ public static class DbContextWithListExtensions
         IQueryable<TEntity> query = dbSet.AsQueryable();
         if (filter != null)
         {
-            query = query.Where(e => filter(e));
+            query = query.Where(filter);
         }
 
         var dbEntities = await query.AsNoTracking().ToListAsync();
@@ -110,7 +111,7 @@ public static class DbContextWithListExtensions
         this DbContext context,
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Func<TEntity, bool>? filter = null)
+        Expression<Func<TEntity, bool>>? filter = null)
         where TEntity : class
         where TKey : notnull
     {
@@ -141,7 +142,7 @@ public static class DbContextWithListExtensions
         this DbContext context,
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Func<TEntity, bool>? filter = null)
+        Expression<Func<TEntity, bool>>? filter = null)
         where TEntity : class
         where TKey : notnull
     {
@@ -172,7 +173,7 @@ public static class DbContextWithListExtensions
         this DbContext context,
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Func<TEntity, bool>? filter = null)
+        Expression<Func<TEntity, bool>>? filter = null)
         where TEntity : class
         where TKey : notnull
     {

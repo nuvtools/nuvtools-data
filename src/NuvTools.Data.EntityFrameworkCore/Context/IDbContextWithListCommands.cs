@@ -1,4 +1,5 @@
 ﻿using NuvTools.Common.ResultWrapper;
+using System.Linq.Expressions;
 
 namespace NuvTools.Data.EntityFrameworkCore.Context;
 
@@ -27,7 +28,7 @@ public interface IDbContextWithListCommands
     Task<IResult> SyncFromListAsync<TEntity, TKey>(
        IEnumerable<TEntity> entities,
        Func<TEntity, TKey> keySelector,
-       Func<TEntity, bool>? filter = null)
+       Expression<Func<TEntity, bool>>? filter = null)
        where TEntity : class
        where TKey : notnull;
 
@@ -53,7 +54,7 @@ public interface IDbContextWithListCommands
     Task<IResult> AddOrUpdateFromListAsync<TEntity, TKey>(
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Func<TEntity, bool>? filter = null)
+        Expression<Func<TEntity, bool>>? filter = null)
         where TEntity : class
         where TKey : notnull;
 
@@ -79,7 +80,7 @@ public interface IDbContextWithListCommands
     Task<IResult> AddOrRemoveFromListAsync<TEntity, TKey>(
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Func<TEntity, bool>? filter = null)
+        Expression<Func<TEntity, bool>>? filter = null)
         where TEntity : class
         where TKey : notnull;
 }
