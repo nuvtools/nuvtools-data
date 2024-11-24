@@ -9,7 +9,7 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>NuvTools.Data.snk</AssemblyOriginatorKeyFile>
 		<Description>Library containg helpers to manipulate data.</Description>
-		<Version>9.0.1</Version>
+		<Version>9.0.3</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
