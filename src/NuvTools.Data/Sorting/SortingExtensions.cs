@@ -1,14 +1,10 @@
-﻿using System.Linq.Expressions;
+﻿using NuvTools.Data.Sorting.Enumerations;
+using System.Linq.Expressions;
 
 namespace NuvTools.Data.Sorting;
 
 public static class SortingExtensions
 {
-    public enum SortDirection
-    {
-        ASC = 0,
-        DESC = 1
-    }
 
     public static IOrderedQueryable<T> Sort<T, TKey>(this IQueryable<T> list, Expression<Func<T, TKey>> property, SortDirection direction = SortDirection.ASC)
     {

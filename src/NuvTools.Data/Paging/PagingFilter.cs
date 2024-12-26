@@ -1,4 +1,4 @@
-﻿using static NuvTools.Data.Sorting.SortingExtensions;
+﻿using NuvTools.Data.Sorting.Enumerations;
 
 namespace NuvTools.Data.Paging;
 
