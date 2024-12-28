@@ -11,6 +11,9 @@ public interface IDbContextCommands
 
     Task CommitTransactionAsync(CancellationToken cancellationToken = default);
 
+    Task ExecuteWithStrategyAsync(Func<CancellationToken, Task> action,
+                                        CancellationToken cancellationToken = default);
+
     Task<T> ExecuteWithStrategyAsync<T>(Func<CancellationToken, Task<T>> action,
                                         CancellationToken cancellationToken = default);
 

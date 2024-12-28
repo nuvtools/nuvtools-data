@@ -83,22 +83,49 @@ public static class DbContextExtensions
         }
     }
 
+
     /// <summary>
-    /// Executes the provided action within the execution strategy of the database context.
+    /// Executes the provided action within the execution strategy of the DbContext.
     /// <para>
     /// <see href="https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency" />
     /// </para>
     /// </summary>
-    /// <typeparam name="T">The type of the result returned by the action.</typeparam>
-    /// <param name="context">The database context.</param>
-    /// <param name="action">The action to be executed, which takes a CancellationToken and returns a Task of type T.</param>
-    /// <param name="cancellationToken">A CancellationToken to observe while waiting for the task to complete. Default is CancellationToken.None.</param>
+    /// <param name="context">The DbContext instance.</param>
+    /// <param name="action">The action to execute.</param>
+    /// <param name="cancellationToken">A CancellationToken to observe while waiting for the task to complete.</param>
+    /// <returns>A Task representing the asynchronous operation.</returns>
+    public static async Task ExecuteWithStrategyAsync(this DbContext context,
+                                                       Func<CancellationToken, Task> action,
+                                                       CancellationToken cancellationToken = default)
+    {
+        var strategy = context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async ct =>
+        {
+            await action(ct);
+        }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Executes the provided action within the execution strategy of the DbContext and returns a result.
+    /// <para>
+    /// <see href="https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency" />
+    /// </para>
+    /// </summary>
+    /// <typeparam name="T">The type of the result.</typeparam>
+    /// <param name="context">The DbContext instance.</param>
+    /// <param name="action">The action to execute.</param>
+    /// <param name="cancellationToken">A CancellationToken to observe while waiting for the task to complete.</param>
     /// <returns>A Task representing the asynchronous operation, with a result of type T.</returns>
     public static async Task<T> ExecuteWithStrategyAsync<T>(this DbContext context,
                                                             Func<CancellationToken, Task<T>> action,
                                                             CancellationToken cancellationToken = default)
     {
-        var strategy = context.Database.CreateExecutionStrategy();
-        return await strategy.ExecuteAsync(action, cancellationToken);
+        T result = default!;
+        await context.ExecuteWithStrategyAsync(async ct =>
+        {
+            result = await action(ct);
+        }, cancellationToken);
+        return result;
     }
+
 }

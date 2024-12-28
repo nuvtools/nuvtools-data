@@ -20,8 +20,12 @@ public abstract class DbContextBase : DbContext, IDbContextCommands, IDbContextW
         return Database.BeginTransactionAsync(cancellationToken);
     }
 
-    public Task<T> ExecuteWithStrategyAsync<T>(Func<CancellationToken, Task<T>> action,
-                                                CancellationToken cancellationToken = default)
+    public Task ExecuteWithStrategyAsync(Func<CancellationToken, Task> action, CancellationToken cancellationToken = default)
+    {
+        return Extensions.DbContextExtensions.ExecuteWithStrategyAsync(this, action, cancellationToken);
+    }
+
+    public Task<T> ExecuteWithStrategyAsync<T>(Func<CancellationToken, Task<T>> action, CancellationToken cancellationToken = default)
     {
         return Extensions.DbContextExtensions.ExecuteWithStrategyAsync(this, action, cancellationToken);
     }
