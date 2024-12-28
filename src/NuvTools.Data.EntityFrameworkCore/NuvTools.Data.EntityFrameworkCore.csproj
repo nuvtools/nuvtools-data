@@ -9,7 +9,7 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>NuvTools.Data.EntityFrameworkCore.snk</AssemblyOriginatorKeyFile>
 		<Description>Library containg helpers to manipulate data using Entity Framework Core.</Description>
-		<Version>9.0.4</Version>
+		<Version>9.0.5</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>

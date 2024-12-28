@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using NuvTools.Common.ResultWrapper;
 
 namespace NuvTools.Data.EntityFrameworkCore.Context;
@@ -10,6 +11,9 @@ public interface IDbContextCommands
     Task RollbackTransactionAsync(CancellationToken cancellationToken = default);
 
     Task CommitTransactionAsync(CancellationToken cancellationToken = default);
+
+    Task<T> ExecuteWithStrategyAsync<T>(Func<CancellationToken, Task<T>> action,
+                                        CancellationToken cancellationToken = default);
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

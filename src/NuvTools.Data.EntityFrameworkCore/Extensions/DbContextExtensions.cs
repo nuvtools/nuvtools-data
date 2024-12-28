@@ -49,7 +49,7 @@ public static class DbContextExtensions
 
         try
         {
-            var existingItem = await context.Set<TEntity>().FindAsync(keyValues) 
+            var existingItem = await context.Set<TEntity>().FindAsync(keyValues)
                                 ?? throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
             context.Entry(existingItem).CurrentValues.SetValues(entity);
             await context.SaveChangesAsync();
@@ -69,7 +69,7 @@ public static class DbContextExtensions
 
         try
         {
-            var existingItem = await context.Set<TEntity>().FindAsync(keyValues) 
+            var existingItem = await context.Set<TEntity>().FindAsync(keyValues)
                                 ?? throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
             context.Set<TEntity>().Remove(existingItem);
 
@@ -84,38 +84,21 @@ public static class DbContextExtensions
     }
 
     /// <summary>
-    /// Executes action inside of Execution Strategy and Transaction. Note: Required when use EnableRetryOnFailure option.
+    /// Executes the provided action within the execution strategy of the database context.
     /// <para>
     /// <see href="https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency" />
     /// </para>
     /// </summary>
-    /// <param name="context"></param>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public static async Task ExecuteResilientTransactionAsync(this DbContext context, Func<Task> action)
-    {
-        await context.ExecuteStrategyAsync(async () =>
-        {
-            using (var transaction = context.Database.BeginTransaction())
-            {
-                await action();
-                transaction.Commit();
-            }
-        });
-    }
-
-    /// <summary>
-    /// Executes action inside of Execution Strategy.
-    /// <para>
-    /// <see href="https://docs.microsoft.com/en-us/ef/core/miscellaneous/connection-resiliency" />
-    /// </para>
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="action"></param>
-    /// <returns></returns>
-    public static async Task ExecuteStrategyAsync(this DbContext context, Func<Task> action)
+    /// <typeparam name="T">The type of the result returned by the action.</typeparam>
+    /// <param name="context">The database context.</param>
+    /// <param name="action">The action to be executed, which takes a CancellationToken and returns a Task of type T.</param>
+    /// <param name="cancellationToken">A CancellationToken to observe while waiting for the task to complete. Default is CancellationToken.None.</param>
+    /// <returns>A Task representing the asynchronous operation, with a result of type T.</returns>
+    public static async Task<T> ExecuteWithStrategyAsync<T>(this DbContext context,
+                                                            Func<CancellationToken, Task<T>> action,
+                                                            CancellationToken cancellationToken = default)
     {
         var strategy = context.Database.CreateExecutionStrategy();
-        await strategy.ExecuteAsync(action);
+        return await strategy.ExecuteAsync(action, cancellationToken);
     }
 }
