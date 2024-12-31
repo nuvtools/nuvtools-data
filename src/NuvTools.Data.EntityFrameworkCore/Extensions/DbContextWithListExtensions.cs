@@ -66,6 +66,7 @@ public static class DbContextWithListExtensions
                 var key = keySelector(entity);
                 var dbEntity = dbEntities.First(e => keySelector(e).Equals(key));
                 context.Entry(dbEntity).CurrentValues.SetValues(entity);
+                context.Entry(dbEntity).State = EntityState.Modified;
             }
         }
 
@@ -81,7 +82,7 @@ public static class DbContextWithListExtensions
 
             return Result.Success();
         }
-        catch (DbUpdateException ex)
+        catch (Exception ex)
         {
             return Result.Fail(ex);
         }
