@@ -52,6 +52,12 @@ public static class DbContextWithListExtensions
         var toUpdate = allowUpdate ? entities.Where(e => dbEntityKeys.Contains(keySelector(e))).ToList() : [];
         var toRemove = allowRemove ? dbEntities.Where(e => !entityKeys.Contains(keySelector(e))).ToList() : [];
 
+        // Perform remove operation
+        if (allowRemove && toRemove.Count != 0)
+        {
+            dbSet.RemoveRange(toRemove);
+        }
+
         // Perform add operation
         if (allowAdd && toAdd.Count != 0)
         {
@@ -68,12 +74,6 @@ public static class DbContextWithListExtensions
                 context.Entry(dbEntity).CurrentValues.SetValues(entity);
                 context.Entry(dbEntity).State = EntityState.Modified;
             }
-        }
-
-        // Perform remove operation
-        if (allowRemove && toRemove.Count != 0)
-        {
-            dbSet.RemoveRange(toRemove);
         }
 
         try
