@@ -9,18 +9,18 @@ public static class DbContextExtensions
     private const string ENTITY_WITH_KEYS_NOT_FOUND = "Entity with keys {0} not found.";
     private const string AT_LEAST_ONE_KEY_MUST_BE_PROVIDED = "At least one key value must be provided.";
 
-    public static async Task<IResult<TKey>> AddAndSaveAsync<TEntity, TKey>(this DbContext context, TEntity entity) where TEntity : class
+    public static async Task<IResult<TKey>> AddAndSaveAsync<TEntity, TKey>(this DbContext context, TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
     {
-        var result = await context.AddAndSaveWithCompositeKeyAsync(entity);
+        var result = await context.AddAndSaveWithCompositeKeyAsync(entity, cancellationToken);
         return Result<TKey>.Success((TKey)result.Data![0]);
     }
 
-    public static async Task<IResult<object[]>> AddAndSaveWithCompositeKeyAsync<TEntity>(this DbContext context, TEntity entity) where TEntity : class
+    public static async Task<IResult<object[]>> AddAndSaveWithCompositeKeyAsync<TEntity>(this DbContext context, TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
     {
         try
         {
             context.Set<TEntity>().Add(entity);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
 
             return Result<object[]>.Success(context.FindPrimaryKeyValues(entity));
         }
@@ -34,25 +34,29 @@ public static class DbContextExtensions
     {
         var entry = context.Entry(entity);
 
-        object[] keyValues = entry.Metadata.FindPrimaryKey()!
+        object[] keyValues = [.. entry.Metadata.FindPrimaryKey()!
                      .Properties
-                     .Select(p => entry.Property(p.Name).CurrentValue!)
-                     .ToArray();
+                     .Select(p => entry.Property(p.Name).CurrentValue!)];
 
         return keyValues;
     }
 
     public static async Task<IResult> UpdateAndSaveAsync<TEntity>(this DbContext context, TEntity entity, params object[] keyValues) where TEntity : class
     {
+        return await context.UpdateAndSaveAsync(entity, keyValues, CancellationToken.None);
+    }
+
+    public static async Task<IResult> UpdateAndSaveAsync<TEntity>(this DbContext context, TEntity entity, object[] keyValues, CancellationToken cancellationToken = default) where TEntity : class
+    {
         if (keyValues is null || keyValues.Length == 0)
             return Result.ValidationFail(AT_LEAST_ONE_KEY_MUST_BE_PROVIDED);
 
         try
         {
-            var existingItem = await context.Set<TEntity>().FindAsync(keyValues)
+            var existingItem = await context.Set<TEntity>().FindAsync(keyValues, cancellationToken)
                                 ?? throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
             context.Entry(existingItem).CurrentValues.SetValues(entity);
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }
@@ -64,16 +68,21 @@ public static class DbContextExtensions
 
     public static async Task<IResult> RemoveAndSaveAsync<TEntity>(this DbContext context, params object[] keyValues) where TEntity : class
     {
+        return await context.RemoveAndSaveAsync<TEntity>(keyValues, CancellationToken.None);
+    }
+
+    public static async Task<IResult> RemoveAndSaveAsync<TEntity>(this DbContext context, object[] keyValues, CancellationToken cancellationToken = default) where TEntity : class
+    {
         if (keyValues is null || keyValues.Length == 0)
             return Result.ValidationFail(AT_LEAST_ONE_KEY_MUST_BE_PROVIDED);
 
         try
         {
-            var existingItem = await context.Set<TEntity>().FindAsync(keyValues)
+            var existingItem = await context.Set<TEntity>().FindAsync(keyValues, cancellationToken)
                                 ?? throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
             context.Set<TEntity>().Remove(existingItem);
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }

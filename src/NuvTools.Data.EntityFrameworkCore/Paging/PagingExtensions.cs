@@ -5,9 +5,12 @@ namespace NuvTools.Data.EntityFrameworkCore.Paging;
 
 public static class PagingExtensions
 {
-    public static async Task<PagingWithQueryableList<T>> PagingWrapAsync<T>(this IQueryable<T> list, int pageNumber = 1, int pageSize = 30)
+    public static async Task<PagingWithQueryableList<T>> PagingWrapAsync<T>(this IQueryable<T> list, int pageNumber = 1, int pageSize = 30, CancellationToken cancellationToken = default)
     {
-        var total = await list.CountAsync().ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(list, nameof(list));
+
+        var total = await list.CountAsync(cancellationToken).ConfigureAwait(false);
+
         return new PagingWithQueryableList<T>
         {
             List = list.Paging(pageNumber, pageSize),
@@ -18,10 +21,11 @@ public static class PagingExtensions
 
     #region Conversions
 
-    public static async Task<PagingWithEnumerableList<T>> ToPagingWithEnumerableListAsync<T>(this PagingWithQueryableList<T> paging)
+    public static async Task<PagingWithEnumerableList<T>> ToPagingWithEnumerableListAsync<T>(this PagingWithQueryableList<T> paging, CancellationToken cancellationToken = default)
     {
-        if (paging is null) throw new ArgumentNullException(nameof(paging));
-        var list = await paging.List.ToListAsync().ConfigureAwait(false);
+        ArgumentNullException.ThrowIfNull(paging, nameof(paging));
+
+        var list = await paging.List.ToListAsync(cancellationToken).ConfigureAwait(false);
 
         return new PagingWithEnumerableList<T>
         {
@@ -32,5 +36,6 @@ public static class PagingExtensions
     }
 
     #endregion
+
 
 }

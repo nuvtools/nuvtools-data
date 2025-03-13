@@ -14,6 +14,7 @@ public interface IDbContextWithListCommands
     /// <param name="entities">The list of entities to synchronize with the database.</param>
     /// <param name="keySelector">A function to select the key for matching entities.</param>
     /// <param name="filter">An optional filter predicate to apply to the database entities.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <remarks>
     /// This method adds entities in the list that are not in the database, updates entities that exist in both,
     /// and removes entities in the database that are not in the list.
@@ -28,7 +29,7 @@ public interface IDbContextWithListCommands
     Task<IResult> SyncFromListAsync<TEntity, TKey>(
        IEnumerable<TEntity> entities,
        Func<TEntity, TKey> keySelector,
-       Expression<Func<TEntity, bool>>? filter = null)
+       Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default)
        where TEntity : class
        where TKey : notnull;
 
@@ -40,6 +41,7 @@ public interface IDbContextWithListCommands
     /// <param name="entities">The list of entities to synchronize with the database.</param>
     /// <param name="keySelector">A function to select the key for matching entities.</param>
     /// <param name="filter">An optional filter predicate to apply to the database entities.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <remarks>
     /// This method adds entities in the list that are not in the database and updates entities that exist in both.
     /// It does not remove any entities from the database.
@@ -54,7 +56,7 @@ public interface IDbContextWithListCommands
     Task<IResult> AddOrUpdateFromListAsync<TEntity, TKey>(
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Expression<Func<TEntity, bool>>? filter = null)
+        Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default)
         where TEntity : class
         where TKey : notnull;
 
@@ -66,6 +68,7 @@ public interface IDbContextWithListCommands
     /// <param name="entities">The list of entities to synchronize with the database.</param>
     /// <param name="keySelector">A function to select the key for matching entities.</param>
     /// <param name="filter">An optional filter predicate to apply to the database entities.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <remarks>
     /// This method adds entities in the list that are not in the database and removes entities in the database
     /// that are not in the list. It does not update any entities.
@@ -80,7 +83,7 @@ public interface IDbContextWithListCommands
     Task<IResult> AddOrRemoveFromListAsync<TEntity, TKey>(
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Expression<Func<TEntity, bool>>? filter = null)
+        Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default)
         where TEntity : class
         where TKey : notnull;
 }

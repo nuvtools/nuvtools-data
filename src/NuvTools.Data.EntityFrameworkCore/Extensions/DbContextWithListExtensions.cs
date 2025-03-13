@@ -18,6 +18,7 @@ public static class DbContextWithListExtensions
     /// <param name="allowAdd">Determines whether new entities in the list should be added to the database.</param>
     /// <param name="allowUpdate">Determines whether existing entities in the database should be updated with values from the list.</param>
     /// <param name="allowRemove">Determines whether entities in the database that are not in the list should be removed.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <exception cref="ArgumentNullException">Thrown if any of the required parameters are null.</exception>
     private static async Task<IResult> ModifyEntitiesAsync<TEntity, TKey>(
         this DbContext context,
@@ -26,7 +27,8 @@ public static class DbContextWithListExtensions
         Expression<Func<TEntity, bool>>? filter,
         bool allowAdd,
         bool allowUpdate,
-        bool allowRemove)
+        bool allowRemove,
+        CancellationToken cancellationToken = default)
         where TEntity : class
         where TKey : notnull
     {
@@ -44,7 +46,7 @@ public static class DbContextWithListExtensions
             query = query.Where(filter);
         }
 
-        var dbEntities = await query.AsNoTracking().ToListAsync();
+        var dbEntities = await query.AsNoTracking().ToListAsync(cancellationToken: cancellationToken);
         var dbEntityKeys = dbEntities.Select(keySelector).ToHashSet();
 
         // Find entities to add, update, or remove
@@ -78,7 +80,7 @@ public static class DbContextWithListExtensions
 
         try
         {
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(cancellationToken: cancellationToken);
 
             return Result.Success();
         }
@@ -97,6 +99,7 @@ public static class DbContextWithListExtensions
     /// <param name="entities">The list of entities to synchronize with the database.</param>
     /// <param name="keySelector">A function to select the key for matching entities.</param>
     /// <param name="filter">An optional filter predicate to apply to the database entities.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <remarks>
     /// This method adds entities in the list that are not in the database, updates entities that exist in both,
     /// and removes entities in the database that are not in the list.
@@ -112,11 +115,11 @@ public static class DbContextWithListExtensions
         this DbContext context,
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Expression<Func<TEntity, bool>>? filter = null)
+        Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default)
         where TEntity : class
         where TKey : notnull
     {
-        return context.ModifyEntitiesAsync(entities, keySelector, filter, allowAdd: true, allowUpdate: true, allowRemove: true);
+        return context.ModifyEntitiesAsync(entities, keySelector, filter, allowAdd: true, allowUpdate: true, allowRemove: true, cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -128,6 +131,7 @@ public static class DbContextWithListExtensions
     /// <param name="entities">The list of entities to synchronize with the database.</param>
     /// <param name="keySelector">A function to select the key for matching entities.</param>
     /// <param name="filter">An optional filter predicate to apply to the database entities.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <remarks>
     /// This method adds entities in the list that are not in the database and updates entities that exist in both.
     /// It does not remove any entities from the database.
@@ -143,11 +147,11 @@ public static class DbContextWithListExtensions
         this DbContext context,
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Expression<Func<TEntity, bool>>? filter = null)
+        Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default)
         where TEntity : class
         where TKey : notnull
     {
-        return context.ModifyEntitiesAsync(entities, keySelector, filter, allowAdd: true, allowUpdate: true, allowRemove: false);
+        return context.ModifyEntitiesAsync(entities, keySelector, filter, allowAdd: true, allowUpdate: true, allowRemove: false, cancellationToken: cancellationToken);
     }
 
     /// <summary>
@@ -159,6 +163,7 @@ public static class DbContextWithListExtensions
     /// <param name="entities">The list of entities to synchronize with the database.</param>
     /// <param name="keySelector">A function to select the key for matching entities.</param>
     /// <param name="filter">An optional filter predicate to apply to the database entities.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <remarks>
     /// This method adds entities in the list that are not in the database and removes entities in the database
     /// that are not in the list. It does not update any entities.
@@ -174,10 +179,10 @@ public static class DbContextWithListExtensions
         this DbContext context,
         IEnumerable<TEntity> entities,
         Func<TEntity, TKey> keySelector,
-        Expression<Func<TEntity, bool>>? filter = null)
+        Expression<Func<TEntity, bool>>? filter = null, CancellationToken cancellationToken = default)
         where TEntity : class
         where TKey : notnull
     {
-        return context.ModifyEntitiesAsync(entities, keySelector, filter, allowAdd: true, allowUpdate: false, allowRemove: true);
+        return context.ModifyEntitiesAsync(entities, keySelector, filter, allowAdd: true, allowUpdate: false, allowRemove: true, cancellationToken: cancellationToken);
     }
 }
