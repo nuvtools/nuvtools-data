@@ -22,6 +22,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuvTools.Data.Test", "tests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuvTools.Data.EntityFrameworkCore.Test", "tests\NuvTools.Data.EntityFrameworkCore.Test\NuvTools.Data.EntityFrameworkCore.Test.csproj", "{F4564EF0-E6E6-4858-87F5-18006B1F9079}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuvTools.Data.EntityFrameworkCore.PostgreSQL", "src\NuvTools.Data.EntityFrameworkCore.PostgreSQL\NuvTools.Data.EntityFrameworkCore.PostgreSQL.csproj", "{438E7FD8-19FC-4B66-A85B-E83ACD14422D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{F4564EF0-E6E6-4858-87F5-18006B1F9079}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4564EF0-E6E6-4858-87F5-18006B1F9079}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4564EF0-E6E6-4858-87F5-18006B1F9079}.Release|Any CPU.Build.0 = Release|Any CPU
+		{438E7FD8-19FC-4B66-A85B-E83ACD14422D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{438E7FD8-19FC-4B66-A85B-E83ACD14422D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{438E7FD8-19FC-4B66-A85B-E83ACD14422D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{438E7FD8-19FC-4B66-A85B-E83ACD14422D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +64,7 @@ Global
 		{65F2ED4C-C2D4-4550-AA33-733969B4EB16} = {4EED4DFA-0207-41CB-8FB1-851C74DC577A}
 		{3B4F9A5E-A076-45B0-A136-61E63D15A4AA} = {C7C93809-B6CC-4BF1-8C9E-DBF6BB516CD6}
 		{F4564EF0-E6E6-4858-87F5-18006B1F9079} = {C7C93809-B6CC-4BF1-8C9E-DBF6BB516CD6}
+		{438E7FD8-19FC-4B66-A85B-E83ACD14422D} = {4EED4DFA-0207-41CB-8FB1-851C74DC577A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B8C481F3-CC0B-42F2-AD61-DE0517D81C1B}

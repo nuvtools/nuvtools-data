@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 using NuvTools.Data.EntityFrameworkCore.Context;
 
-namespace NuvTools.Data.EntityFrameworkCore.SqlServer.Extensions;
+namespace NuvTools.Data.EntityFrameworkCore.PostgreSQL.Extensions;
 
 public static class ServiceCollectionExtensions
 {
@@ -32,31 +32,31 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         string connectionName,
         string settingsFileName = "appsettings.json",
-        Action<SqlServerDbContextOptionsBuilder>? sqlServerOptionsAction = null,
-        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContextBase
+        Action<NpgsqlDbContextOptionsBuilder>? npgsqlOptionsAction = null,
+        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContextSnakeCaseNamingBase
     {
         IConfiguration configuration = GetConfiguration(settingsFileName);
-        return services.AddDatabaseByConnectionName<TContext>(configuration, connectionName, sqlServerOptionsAction, contextLifetime);
+        return services.AddDatabaseByConnectionName<TContext>(configuration, connectionName, npgsqlOptionsAction, contextLifetime);
     }
 
     public static IServiceCollection AddDatabaseByConnectionName<TContext>(
         this IServiceCollection services,
         IConfiguration configuration,
         string connectionName,
-        Action<SqlServerDbContextOptionsBuilder>? sqlServerOptionsAction = null,
-        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContextBase
+        Action<NpgsqlDbContextOptionsBuilder>? npgsqlOptionsAction = null,
+        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContextSnakeCaseNamingBase
     {
-        return services.AddDatabase<TContext>(configuration.GetConnectionString(connectionName), sqlServerOptionsAction, contextLifetime);
+        return services.AddDatabase<TContext>(configuration.GetConnectionString(connectionName), npgsqlOptionsAction, contextLifetime);
     }
 
     public static IServiceCollection AddDatabase<TContext>(
         this IServiceCollection services,
         string? connectionString,
-        Action<SqlServerDbContextOptionsBuilder>? sqlServerOptionsAction = null,
-        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContextBase
+        Action<NpgsqlDbContextOptionsBuilder>? npgsqlOptionsAction = null,
+        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContextSnakeCaseNamingBase
     {
         return services
-            .AddDbContext<TContext>(options => options
-                .UseSqlServer(connectionString, sqlServerOptionsAction), contextLifetime: contextLifetime);
+            .AddDbContext<TContext>(options => options.UseNpgsql(connectionString, npgsqlOptionsAction), 
+                                    contextLifetime: contextLifetime);
     }
 }
