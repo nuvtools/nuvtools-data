@@ -6,13 +6,14 @@ namespace NuvTools.Data.EntityFrameworkCore.Extensions;
 
 public static class DbContextExtensions
 {
-    private const string ENTITY_WITH_KEYS_NOT_FOUND = "Entity with keys {0} not found.";
-    private const string AT_LEAST_ONE_KEY_MUST_BE_PROVIDED = "At least one key value must be provided.";
+    private const string EntityWithKeysNotFound = "Entity with keys {0} not found.";
+    private const string AtLeastOneKeyMustBeProvided = "At least one key value must be provided.";
 
     public static async Task<IResult<TKey>> AddAndSaveAsync<TEntity, TKey>(this DbContext context, TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
     {
         var result = await context.AddAndSaveWithCompositeKeyAsync(entity, cancellationToken);
-        return Result<TKey>.Success((TKey)result.Data![0]);
+
+        return (result.Succeeded) ? Result<TKey>.Success((TKey)result.Data![0]) : Result<TKey>.Fail(result.Messages);
     }
 
     public static async Task<IResult<object[]>> AddAndSaveWithCompositeKeyAsync<TEntity>(this DbContext context, TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
@@ -49,12 +50,12 @@ public static class DbContextExtensions
     public static async Task<IResult> UpdateAndSaveAsync<TEntity>(this DbContext context, TEntity entity, object[] keyValues, CancellationToken cancellationToken = default) where TEntity : class
     {
         if (keyValues is null || keyValues.Length == 0)
-            return Result.ValidationFail(AT_LEAST_ONE_KEY_MUST_BE_PROVIDED);
+            return Result.ValidationFail(AtLeastOneKeyMustBeProvided);
 
         try
         {
             var existingItem = await context.Set<TEntity>().FindAsync(keyValues, cancellationToken)
-                                ?? throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
+                                ?? throw new InvalidOperationException(EntityWithKeysNotFound.Format(string.Join(", ", keyValues)));
             context.Entry(existingItem).CurrentValues.SetValues(entity);
             await context.SaveChangesAsync(cancellationToken);
 
@@ -74,12 +75,12 @@ public static class DbContextExtensions
     public static async Task<IResult> RemoveAndSaveAsync<TEntity>(this DbContext context, object[] keyValues, CancellationToken cancellationToken = default) where TEntity : class
     {
         if (keyValues is null || keyValues.Length == 0)
-            return Result.ValidationFail(AT_LEAST_ONE_KEY_MUST_BE_PROVIDED);
+            return Result.ValidationFail(AtLeastOneKeyMustBeProvided);
 
         try
         {
             var existingItem = await context.Set<TEntity>().FindAsync(keyValues, cancellationToken)
-                                ?? throw new InvalidOperationException(ENTITY_WITH_KEYS_NOT_FOUND.Format(string.Join(", ", keyValues)));
+                                ?? throw new InvalidOperationException(EntityWithKeysNotFound.Format(string.Join(", ", keyValues)));
             context.Set<TEntity>().Remove(existingItem);
 
             await context.SaveChangesAsync(cancellationToken);
