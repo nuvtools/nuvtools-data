@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
-using NuvTools.Data.EntityFrameworkCore.Context;
 
 namespace NuvTools.Data.EntityFrameworkCore.PostgreSQL.Extensions;
 
@@ -33,7 +32,7 @@ public static class ServiceCollectionExtensions
         string connectionName,
         string settingsFileName = "appsettings.json",
         Action<NpgsqlDbContextOptionsBuilder>? npgsqlOptionsAction = null,
-        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContextSnakeCaseNamingBase
+        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
         IConfiguration configuration = GetConfiguration(settingsFileName);
         return services.AddDatabaseByConnectionName<TContext>(configuration, connectionName, npgsqlOptionsAction, contextLifetime);
@@ -44,7 +43,7 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration,
         string connectionName,
         Action<NpgsqlDbContextOptionsBuilder>? npgsqlOptionsAction = null,
-        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContextSnakeCaseNamingBase
+        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
         return services.AddDatabase<TContext>(configuration.GetConnectionString(connectionName), npgsqlOptionsAction, contextLifetime);
     }
@@ -53,7 +52,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services,
         string? connectionString,
         Action<NpgsqlDbContextOptionsBuilder>? npgsqlOptionsAction = null,
-        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContextSnakeCaseNamingBase
+        ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
         return services
             .AddDbContext<TContext>(options => options.UseNpgsql(connectionString, npgsqlOptionsAction), 
