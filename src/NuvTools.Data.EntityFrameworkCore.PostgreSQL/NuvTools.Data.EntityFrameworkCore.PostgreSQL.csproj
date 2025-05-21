@@ -12,7 +12,7 @@
 		<SignAssembly>True</SignAssembly>
 		<AssemblyOriginatorKeyFile>NuvTools.Data.EntityFrameworkCore.PostgreSQL.snk</AssemblyOriginatorKeyFile>
 		<Description>Library containg helpers to manipulate data using Entity Framework Core for PostgreSQL.</Description>
-		<Version>9.3.0</Version>
+		<Version>9.3.1</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
