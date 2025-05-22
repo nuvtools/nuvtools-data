@@ -14,10 +14,16 @@ public static class ModelBuilderExtensions
             var schema = entity.GetSchema();
 
             if (!string.IsNullOrWhiteSpace(tableName))
-                entity.SetTableName(ToSnakeCase(tableName));
+            {
+                tableName = ToSnakeCase(tableName);
+                entity.SetTableName(tableName);
+            }
 
             if (!string.IsNullOrWhiteSpace(schema))
-                entity.SetSchema(ToSnakeCase(schema));
+            {
+                schema = ToSnakeCase(schema);
+                entity.SetSchema(schema);
+            }
 
             var storeObject = StoreObjectIdentifier.Table(tableName!, schema);
 
