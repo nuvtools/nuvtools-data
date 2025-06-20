@@ -1,5 +1,5 @@
 ﻿namespace NuvTools.Data.Paging;
 
-public record PagingWithEnumerableList<T> : PagingBase<IEnumerable<T>, T>
+public class PagingWithEnumerableList<T> : PagingBase<IEnumerable<T>, T>
 {
 }

@@ -1,6 +1,6 @@
 ﻿namespace NuvTools.Data.Paging;
 
-public abstract record PagingBase<T, R> where T : IEnumerable<R>
+public abstract class PagingBase<T, R> where T : IEnumerable<R>
 {
     public required int PageNumber { get; set; }
 
