@@ -19,6 +19,12 @@ public static class PagingExtensions
         };
     }
 
+    public static async Task<PagingWithEnumerableList<T>> PagingWrapWithEnumerableListAsync<T>(this IQueryable<T> list, int pageNumber = 1, int pageSize = 30, CancellationToken cancellationToken = default)
+    {
+        var pagedQueryable = await list.PagingWrapAsync(pageNumber, pageSize, cancellationToken);
+        return await pagedQueryable.ToPagingWithEnumerableListAsync(cancellationToken);
+    }
+
     #region Conversions
 
     public static async Task<PagingWithEnumerableList<T>> ToPagingWithEnumerableListAsync<T>(this PagingWithQueryableList<T> paging, CancellationToken cancellationToken = default)
