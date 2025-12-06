@@ -3,6 +3,10 @@ using System.Linq.Expressions;
 
 namespace NuvTools.Data.EntityFrameworkCore.Context;
 
+/// <summary>
+/// Defines operations for synchronizing database entities with in-memory lists.
+/// Provides methods for bulk add, update, and remove operations.
+/// </summary>
 public interface IDbContextWithListCommands
 {
 

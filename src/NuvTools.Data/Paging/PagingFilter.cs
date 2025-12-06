@@ -3,20 +3,34 @@
 namespace NuvTools.Data.Paging;
 
 /// <summary>
-/// Filter for paging purpose.
+/// Represents a filter for paging operations containing page number and page size.
 /// </summary>
 public class PagingFilter
 {
+    /// <summary>
+    /// Gets or sets the page number (1-indexed). Defaults to 1.
+    /// </summary>
     public int PageNumber { get; set; } = 1;
+
+    /// <summary>
+    /// Gets or sets the number of items per page. Defaults to 30.
+    /// </summary>
     public int PageSize { get; set; } = 30;
 }
 
 /// <summary>
-/// Filter for paging purpose.
+/// Represents a filter for paging operations with sorting capabilities.
 /// </summary>
-/// <typeparam name="T">Enum type with column option to sort.</typeparam>
+/// <typeparam name="T">Enum type representing the available columns to sort by.</typeparam>
 public class PagingFilter<T> : PagingFilter where T : Enum
 {
+    /// <summary>
+    /// Gets or sets the column to sort by.
+    /// </summary>
     public required T SortColumn { get; set; }
+
+    /// <summary>
+    /// Gets or sets the sort direction (ascending or descending). Defaults to ascending.
+    /// </summary>
     public SortDirection SortDirection { get; set; } = SortDirection.ASC;
 }

@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src\NuvTools.Data\NuvTools.Data.csproj" />
+    <Project Path="src\NuvTools.Data.EntityFrameworkCore\NuvTools.Data.EntityFrameworkCore.csproj" />
+    <Project Path="src\NuvTools.Data.EntityFrameworkCore.SqlServer\NuvTools.Data.EntityFrameworkCore.SqlServer.csproj" />
+    <Project Path="src\NuvTools.Data.EntityFrameworkCore.PostgreSQL\NuvTools.Data.EntityFrameworkCore.PostgreSQL.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests\NuvTools.Data.Test\NuvTools.Data.Test.csproj" />
+    <Project Path="tests\NuvTools.Data.EntityFrameworkCore.Test\NuvTools.Data.EntityFrameworkCore.Test.csproj" />
+  </Folder>
+</Solution>

@@ -6,9 +6,17 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 
 namespace NuvTools.Data.EntityFrameworkCore.PostgreSQL.Extensions;
 
+/// <summary>
+/// Extension methods for registering PostgreSQL DbContext instances in the dependency injection container.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
 
+    /// <summary>
+    /// Loads configuration from a JSON settings file.
+    /// </summary>
+    /// <param name="settingsFileName">The name of the settings file.</param>
+    /// <returns>The loaded configuration.</returns>
     private static IConfiguration GetConfiguration(string settingsFileName)
     {
         var builder = new ConfigurationBuilder()
@@ -27,6 +35,16 @@ public static class ServiceCollectionExtensions
         return builder.Build();
     }
 
+    /// <summary>
+    /// Registers a PostgreSQL DbContext in the service collection using a connection name from a settings file.
+    /// </summary>
+    /// <typeparam name="TContext">The type of DbContext to register.</typeparam>
+    /// <param name="services">The service collection.</param>
+    /// <param name="connectionName">The name of the connection string in the settings file.</param>
+    /// <param name="settingsFileName">The settings file name. Defaults to "appsettings.json".</param>
+    /// <param name="npgsqlOptionsAction">Optional action to configure PostgreSQL-specific options via Npgsql.</param>
+    /// <param name="contextLifetime">The lifetime of the DbContext in the DI container. Defaults to Scoped.</param>
+    /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddDatabaseByConnectionName<TContext>(
         this IServiceCollection services,
         string connectionName,
@@ -38,6 +56,16 @@ public static class ServiceCollectionExtensions
         return services.AddDatabaseByConnectionName<TContext>(configuration, connectionName, npgsqlOptionsAction, contextLifetime);
     }
 
+    /// <summary>
+    /// Registers a PostgreSQL DbContext in the service collection using a connection name from an existing configuration.
+    /// </summary>
+    /// <typeparam name="TContext">The type of DbContext to register.</typeparam>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The configuration containing connection strings.</param>
+    /// <param name="connectionName">The name of the connection string in the configuration.</param>
+    /// <param name="npgsqlOptionsAction">Optional action to configure PostgreSQL-specific options via Npgsql.</param>
+    /// <param name="contextLifetime">The lifetime of the DbContext in the DI container. Defaults to Scoped.</param>
+    /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddDatabaseByConnectionName<TContext>(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -48,6 +76,15 @@ public static class ServiceCollectionExtensions
         return services.AddDatabase<TContext>(configuration.GetConnectionString(connectionName), npgsqlOptionsAction, contextLifetime);
     }
 
+    /// <summary>
+    /// Registers a PostgreSQL DbContext in the service collection using a connection string.
+    /// </summary>
+    /// <typeparam name="TContext">The type of DbContext to register.</typeparam>
+    /// <param name="services">The service collection.</param>
+    /// <param name="connectionString">The PostgreSQL connection string.</param>
+    /// <param name="npgsqlOptionsAction">Optional action to configure PostgreSQL-specific options via Npgsql.</param>
+    /// <param name="contextLifetime">The lifetime of the DbContext in the DI container. Defaults to Scoped.</param>
+    /// <returns>The service collection for chaining.</returns>
     public static IServiceCollection AddDatabase<TContext>(
         this IServiceCollection services,
         string? connectionString,
@@ -55,7 +92,7 @@ public static class ServiceCollectionExtensions
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
         return services
-            .AddDbContext<TContext>(options => options.UseNpgsql(connectionString, npgsqlOptionsAction), 
+            .AddDbContext<TContext>(options => options.UseNpgsql(connectionString, npgsqlOptionsAction),
                                     contextLifetime: contextLifetime);
     }
 }

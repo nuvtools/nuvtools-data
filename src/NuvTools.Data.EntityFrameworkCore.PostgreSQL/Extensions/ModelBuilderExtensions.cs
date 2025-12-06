@@ -4,8 +4,27 @@ using System.Text;
 
 namespace NuvTools.Data.EntityFrameworkCore.PostgreSQL.Extensions;
 
+/// <summary>
+/// Extension methods for configuring Entity Framework Core models for PostgreSQL databases.
+/// </summary>
 public static class ModelBuilderExtensions
 {
+    /// <summary>
+    /// Applies snake_case naming convention to all database objects (tables, columns, keys, foreign keys, and indexes).
+    /// This is a common convention in PostgreSQL databases where names are lowercase with underscores.
+    /// </summary>
+    /// <param name="builder">The model builder to configure.</param>
+    /// <example>
+    /// protected override void OnModelCreating(ModelBuilder modelBuilder)
+    /// {
+    ///     modelBuilder.UseSnakeCaseNamingConvention();
+    ///     base.OnModelCreating(modelBuilder);
+    /// }
+    /// </example>
+    /// <remarks>
+    /// Converts PascalCase names like "OrderDetails" to snake_case like "order_details".
+    /// This affects table names, column names, schema names, key names, foreign key constraints, and index names.
+    /// </remarks>
     public static void UseSnakeCaseNamingConvention(this ModelBuilder builder)
     {
         foreach (var entity in builder.Model.GetEntityTypes())
@@ -57,6 +76,16 @@ public static class ModelBuilderExtensions
         }
     }
 
+    /// <summary>
+    /// Converts a PascalCase or camelCase string to snake_case.
+    /// </summary>
+    /// <param name="input">The input string to convert.</param>
+    /// <returns>The snake_case version of the input string.</returns>
+    /// <example>
+    /// ToSnakeCase("OrderDetails") returns "order_details"
+    /// ToSnakeCase("customerId") returns "customer_id"
+    /// ToSnakeCase("ProductID2") returns "product_id_2"
+    /// </example>
     private static string ToSnakeCase(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
