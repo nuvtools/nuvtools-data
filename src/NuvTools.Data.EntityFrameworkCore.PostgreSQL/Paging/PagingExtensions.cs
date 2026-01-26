@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using NuvTools.Data.Paging;
 using NuvTools.Data.Paging.Enumerations;
 
@@ -9,6 +10,11 @@ namespace NuvTools.Data.EntityFrameworkCore.PostgreSQL.Paging;
 /// </summary>
 public static class PagingExtensions
 {
+    private const string ApproximateCountSql = @"
+        SELECT COALESCE(c.reltuples, 0)::bigint
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relname = @tableName AND n.nspname = @schema AND c.relkind = 'r'";
     /// <summary>
     /// Wraps a queryable into a paged result with automatic approximate count support for PostgreSQL.
     /// When <see cref="CountMode.Approximate"/> is used and no provider is configured, automatically
@@ -80,7 +86,7 @@ public static class PagingExtensions
     /// </summary>
     /// <param name="context">The DbContext instance.</param>
     /// <param name="tableName">The name of the table.</param>
-    /// <param name="schema">The schema name (optional, uses search_path if not specified).</param>
+    /// <param name="schema">The schema name (optional, defaults to "public" if not specified).</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>The approximate row count from database metadata.</returns>
     public static async Task<long> GetApproximateCountAsync(
@@ -92,34 +98,11 @@ public static class PagingExtensions
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(tableName);
 
-        // Use pg_class for approximate count
-        // reltuples contains the estimated number of rows based on ANALYZE statistics
-        // This is much faster than COUNT(*) for large tables
-        string sql;
-
-        if (string.IsNullOrEmpty(schema))
-        {
-            // Query without schema - uses search_path
-            sql = $@"
-                SELECT COALESCE(reltuples, 0)::bigint
-                FROM pg_class
-                WHERE relname = '{tableName}'
-                AND relkind = 'r'";
-        }
-        else
-        {
-            // Query with explicit schema
-            sql = $@"
-                SELECT COALESCE(c.reltuples, 0)::bigint
-                FROM pg_class c
-                JOIN pg_namespace n ON n.oid = c.relnamespace
-                WHERE c.relname = '{tableName}'
-                AND n.nspname = '{schema}'
-                AND c.relkind = 'r'";
-        }
+        var tableNameParam = new NpgsqlParameter("@tableName", tableName);
+        var schemaParam = new NpgsqlParameter("@schema", schema ?? "public");
 
         var result = await context.Database
-            .SqlQueryRaw<long>(sql)
+            .SqlQueryRaw<long>(ApproximateCountSql, tableNameParam, schemaParam)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 

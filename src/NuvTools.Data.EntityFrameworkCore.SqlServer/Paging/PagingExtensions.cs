@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using NuvTools.Data.Paging;
 using NuvTools.Data.Paging.Enumerations;
@@ -9,6 +10,12 @@ namespace NuvTools.Data.EntityFrameworkCore.SqlServer.Paging;
 /// </summary>
 public static class PagingExtensions
 {
+    private const string ApproximateCountSql = @"
+        SELECT ISNULL(SUM(p.rows), 0)
+        FROM sys.partitions p
+        INNER JOIN sys.tables t ON p.object_id = t.object_id
+        INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
+        WHERE t.name = @tableName AND s.name = @schema AND p.index_id IN (0, 1)";
     /// <summary>
     /// Wraps a queryable into a paged result with automatic approximate count support for SQL Server.
     /// When <see cref="CountMode.Approximate"/> is used and no provider is configured, automatically
@@ -75,12 +82,12 @@ public static class PagingExtensions
     }
 
     /// <summary>
-    /// Gets the approximate row count for a table using SQL Server's sys.dm_db_partition_stats.
+    /// Gets the approximate row count for a table using SQL Server's sys.partitions.
     /// This is faster than COUNT(*) for large tables as it reads from metadata.
     /// </summary>
     /// <param name="context">The DbContext instance.</param>
     /// <param name="tableName">The name of the table.</param>
-    /// <param name="schema">The schema name (optional, uses default schema if not specified).</param>
+    /// <param name="schema">The schema name (optional, defaults to "dbo" if not specified).</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>The approximate row count from database metadata.</returns>
     public static async Task<long> GetApproximateCountAsync(
@@ -92,21 +99,11 @@ public static class PagingExtensions
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(tableName);
 
-        // Build the fully qualified table name for OBJECT_ID
-        var fullTableName = string.IsNullOrEmpty(schema)
-            ? $"[{tableName}]"
-            : $"[{schema}].[{tableName}]";
-
-        // Use sys.dm_db_partition_stats for approximate count
-        // This is faster than COUNT(*) for large tables as it reads from metadata
-        var sql = $@"
-            SELECT ISNULL(SUM(row_count), 0)
-            FROM sys.dm_db_partition_stats
-            WHERE object_id = OBJECT_ID('{fullTableName}')
-            AND index_id < 2";
+        var tableNameParam = new SqlParameter("@tableName", tableName);
+        var schemaParam = new SqlParameter("@schema", schema ?? "dbo");
 
         var result = await context.Database
-            .SqlQueryRaw<long>(sql)
+            .SqlQueryRaw<long>(ApproximateCountSql, tableNameParam, schemaParam)
             .FirstOrDefaultAsync(cancellationToken)
             .ConfigureAwait(false);
 

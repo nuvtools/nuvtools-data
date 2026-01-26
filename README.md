@@ -21,7 +21,8 @@ Nuv Tools Data Libraries are a set of .NET libraries designed to simplify and st
 
 [![NuGet](https://img.shields.io/nuget/v/NuvTools.Data.svg)](https://www.nuget.org/packages/NuvTools.Data/)
 
-Core library with generic helpers for data manipulation:
+Core library providing ORM-agnostic helpers for data manipulation including paging, sorting, and filtering utilities.
+
 - **Paging**: Abstracts paging logic for both `IQueryable` and `IEnumerable` collections
 - **Sorting**: Extension methods for sorting with ascending/descending direction
 - **Filtering**: Paging filters with optional sorting capabilities
@@ -35,7 +36,8 @@ dotnet add package NuvTools.Data
 
 [![NuGet](https://img.shields.io/nuget/v/NuvTools.Data.EntityFrameworkCore.svg)](https://www.nuget.org/packages/NuvTools.Data.EntityFrameworkCore/)
 
-Extensions for Entity Framework Core:
+Entity Framework Core extensions providing DbContext base classes, repository patterns, CRUD operations with Result pattern, transaction management, and async paging utilities.
+
 - **DbContextBase**: Base class with CRUD operations using Result pattern
 - **Transaction Management**: Built-in transaction support with rollback/commit
 - **Execution Strategies**: Connection resiliency with automatic retry
@@ -50,7 +52,8 @@ dotnet add package NuvTools.Data.EntityFrameworkCore
 
 [![NuGet](https://img.shields.io/nuget/v/NuvTools.Data.EntityFrameworkCore.SqlServer.svg)](https://www.nuget.org/packages/NuvTools.Data.EntityFrameworkCore.SqlServer/)
 
-Specialized helpers for SQL Server with EF Core:
+SQL Server-specific Entity Framework Core extensions with DbContext registration helpers for dependency injection.
+
 - **Simple Registration**: `AddDatabase` and `AddDatabaseByConnectionName` extension methods
 - **Configuration Integration**: Load connection strings from `appsettings.json`
 - **SQL Server Options**: Configure SQL Server-specific options via `SqlServerDbContextOptionsBuilder`
@@ -64,7 +67,8 @@ dotnet add package NuvTools.Data.EntityFrameworkCore.SqlServer
 
 [![NuGet](https://img.shields.io/nuget/v/NuvTools.Data.EntityFrameworkCore.PostgreSQL.svg)](https://www.nuget.org/packages/NuvTools.Data.EntityFrameworkCore.PostgreSQL/)
 
-Specialized helpers for PostgreSQL with EF Core:
+PostgreSQL-specific Entity Framework Core extensions with DbContext registration helpers and snake_case naming convention support.
+
 - **Simple Registration**: `AddDatabase` and `AddDatabaseByConnectionName` extension methods
 - **Snake Case Convention**: `UseSnakeCaseNamingConvention` for PostgreSQL naming standards
 - **Npgsql Options**: Configure PostgreSQL-specific options via `NpgsqlDbContextOptionsBuilder`
@@ -443,6 +447,12 @@ dotnet build NuvTools.Data.slnx -c Release
 Packages are automatically generated in `bin/Release` folders when building in Release configuration.
 
 ## 📝 Version History
+
+### Version 10.1.0
+- Refactored paging to use 0-based indexes
+- Added flexible count strategies for optimized paging performance
+- Added database-specific approximate count support
+- Updated package descriptions and tags
 
 ### Version 10.0.0
 - Added .NET 10 support

@@ -8,19 +8,18 @@
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>Library containg helpers to manipulate data using Entity Framework Core.</Description>
+		<Description>Entity Framework Core extensions providing DbContext base classes, repository patterns, CRUD operations with Result pattern, transaction management, and async paging utilities.</Description>
 		<Version>10.1.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
-		<DelaySign>False</DelaySign>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<RepositoryUrl>https://github.com/nuvtools/nuvtools-data</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>Nuv Tools Data Paging Sorting Entity Framework Core</PackageTags>
+		<PackageTags>NuvTools;Data;EFCore;Entity Framework Core;DbContext;Repository;CRUD;Paging;Sorting;Transactions</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -41,10 +40,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.12" Condition="'$(TargetFramework)' == 'net8' OR '$(TargetFramework)' == 'net9'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
-		<PackageReference Include="NuvTools.Common" Version="10.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[9.0.12,9.1.0)" Condition="'$(TargetFramework)' == 'net8' OR '$(TargetFramework)' == 'net9'" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[10.0.2,10.1.0)" Condition="'$(TargetFramework)' == 'net10.0'" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="[10.0.2,10.1.0)" />
+		<PackageReference Include="NuvTools.Common" Version="[10.0.2,10.1.0)" />
 	</ItemGroup>
 
 	<ItemGroup>
