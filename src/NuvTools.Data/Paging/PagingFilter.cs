@@ -16,6 +16,12 @@ public class PagingFilter
     /// Gets or sets the number of items per page. Defaults to 30.
     /// </summary>
     public int PageSize { get; set; } = 30;
+
+    /// <summary>
+    /// Gets or sets the paging options for controlling count behavior.
+    /// When null, the default behavior (always count) is used.
+    /// </summary>
+    public PagingOptions? Options { get; set; }
 }
 
 /// <summary>
