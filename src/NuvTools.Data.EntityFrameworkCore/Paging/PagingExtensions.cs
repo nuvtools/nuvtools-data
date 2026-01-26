@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NuvTools.Data.Paging;
 using NuvTools.Data.Paging.Enumerations;
 
@@ -14,12 +14,12 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the queryable collection.</typeparam>
     /// <param name="list">The source queryable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 30.</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A task that represents the asynchronous operation, containing a paged result with queryable list.</returns>
     /// <exception cref="ArgumentNullException">Thrown when list is null.</exception>
-    public static async Task<PagingWithQueryableList<T>> PagingWrapAsync<T>(this IQueryable<T> list, int pageNumber = 1, int pageSize = 30, CancellationToken cancellationToken = default)
+    public static async Task<PagingWithQueryableList<T>> PagingWrapAsync<T>(this IQueryable<T> list, int pageIndex = 0, int pageSize = 30, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(list, nameof(list));
 
@@ -27,8 +27,8 @@ public static class PagingExtensions
 
         return new PagingWithQueryableList<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, total),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total),
             Total = total
         };
     }
@@ -39,14 +39,14 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the queryable collection.</typeparam>
     /// <param name="list">The source queryable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed).</param>
+    /// <param name="pageIndex">The page index (0-indexed).</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="options">The paging options controlling count behavior.</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A task that represents the asynchronous operation, containing a paged result.</returns>
     /// <exception cref="ArgumentNullException">Thrown when list or options is null.</exception>
     /// <exception cref="InvalidOperationException">Thrown when CountMode.Approximate is used without ApproximateCountProvider.</exception>
-    public static async Task<PagingQueryableResult<T>> PagingWrapAsync<T>(this IQueryable<T> list, int pageNumber, int pageSize, PagingOptions options, CancellationToken cancellationToken = default)
+    public static async Task<PagingQueryableResult<T>> PagingWrapAsync<T>(this IQueryable<T> list, int pageIndex, int pageSize, PagingOptions options, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(list, nameof(list));
         ArgumentNullException.ThrowIfNull(options, nameof(options));
@@ -56,49 +56,20 @@ public static class PagingExtensions
         {
             return new PagingQueryableResult<T>
             {
-                List = list.Paging(pageNumber, pageSize),
-                PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, options.PreCalculatedTotal.Value),
+                List = list.Paging(pageIndex, pageSize),
+                PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, options.PreCalculatedTotal.Value),
                 Total = options.PreCalculatedTotal.Value
             };
         }
 
         return options.CountMode switch
         {
-            CountMode.Skip => PagingWrapSkipCountAsync(list, pageNumber, pageSize),
-            CountMode.HasMore => await PagingWrapWithHasMoreAsync(list, pageNumber, pageSize, cancellationToken).ConfigureAwait(false),
-            CountMode.Threshold => await PagingWrapWithThresholdAsync(list, pageNumber, pageSize, options.CountThreshold, cancellationToken).ConfigureAwait(false),
-            CountMode.Approximate => await PagingWrapWithApproximateAsync(list, pageNumber, pageSize, options, cancellationToken).ConfigureAwait(false),
-            _ => await PagingWrapWithCountAsync(list, pageNumber, pageSize, cancellationToken).ConfigureAwait(false) // CountMode.Always
+            CountMode.Skip => PagingWrapSkipCountAsync(list, pageIndex, pageSize),
+            CountMode.HasMore => await PagingWrapWithHasMoreAsync(list, pageIndex, pageSize, cancellationToken).ConfigureAwait(false),
+            CountMode.Threshold => await PagingWrapWithThresholdAsync(list, pageIndex, pageSize, options.CountThreshold, cancellationToken).ConfigureAwait(false),
+            CountMode.Approximate => await PagingWrapWithApproximateAsync(list, pageIndex, pageSize, options, cancellationToken).ConfigureAwait(false),
+            _ => await PagingWrapWithCountAsync(list, pageIndex, pageSize, cancellationToken).ConfigureAwait(false) // CountMode.Always
         };
-    }
-
-    /// <summary>
-    /// Wraps a queryable into a paged result with DbContext support for approximate count.
-    /// When CountMode.Approximate is used, the ApproximateCountProvider delegate in options is invoked.
-    /// </summary>
-    /// <typeparam name="TEntity">The entity type being queried.</typeparam>
-    /// <param name="list">The source queryable collection.</param>
-    /// <param name="context">The DbContext instance (available for use by database-specific extensions).</param>
-    /// <param name="pageNumber">The page number (1-indexed).</param>
-    /// <param name="pageSize">The number of items per page.</param>
-    /// <param name="options">The paging options controlling count behavior.</param>
-    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
-    /// <returns>A task that represents the asynchronous operation, containing a paged result.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when list, context, or options is null.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when CountMode.Approximate is used without ApproximateCountProvider.</exception>
-    public static async Task<PagingQueryableResult<TEntity>> PagingWrapAsync<TEntity>(
-        this IQueryable<TEntity> list,
-        DbContext context,
-        int pageNumber,
-        int pageSize,
-        PagingOptions options,
-        CancellationToken cancellationToken = default) where TEntity : class
-    {
-        ArgumentNullException.ThrowIfNull(list);
-        ArgumentNullException.ThrowIfNull(context);
-        ArgumentNullException.ThrowIfNull(options);
-
-        return await list.PagingWrapAsync(pageNumber, pageSize, options, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -108,18 +79,18 @@ public static class PagingExtensions
     /// <typeparam name="T">The type of items in the queryable collection.</typeparam>
     /// <param name="list">The source queryable collection.</param>
     /// <param name="total">The pre-calculated total count.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 30.</param>
     /// <returns>A paged result using the provided total.</returns>
     /// <exception cref="ArgumentNullException">Thrown when list is null.</exception>
-    public static PagingQueryableResult<T> PagingWrapWithTotalAsync<T>(this IQueryable<T> list, int total, int pageNumber = 1, int pageSize = 30)
+    public static PagingQueryableResult<T> PagingWrapWithTotalAsync<T>(this IQueryable<T> list, int total, int pageIndex = 0, int pageSize = 30)
     {
         ArgumentNullException.ThrowIfNull(list, nameof(list));
 
         return new PagingQueryableResult<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, total),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total),
             Total = total
         };
     }
@@ -130,18 +101,18 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the queryable collection.</typeparam>
     /// <param name="list">The source queryable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 30.</param>
     /// <returns>A paged result with Total set to null.</returns>
     /// <exception cref="ArgumentNullException">Thrown when list is null.</exception>
-    public static PagingQueryableResult<T> PagingWrapSkipCountAsync<T>(this IQueryable<T> list, int pageNumber = 1, int pageSize = 30)
+    public static PagingQueryableResult<T> PagingWrapSkipCountAsync<T>(this IQueryable<T> list, int pageIndex = 0, int pageSize = 30)
     {
         ArgumentNullException.ThrowIfNull(list, nameof(list));
 
         return new PagingQueryableResult<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumberWithoutTotal(pageNumber),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndexWithoutTotal(pageIndex),
             Total = null
         };
     }
@@ -152,17 +123,17 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the queryable collection.</typeparam>
     /// <param name="list">The source queryable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 30.</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A task that represents the asynchronous operation, containing a paged result with HasMore indicator.</returns>
     /// <exception cref="ArgumentNullException">Thrown when list is null.</exception>
-    public static async Task<PagingQueryableResult<T>> PagingWrapWithHasMoreAsync<T>(this IQueryable<T> list, int pageNumber = 1, int pageSize = 30, CancellationToken cancellationToken = default)
+    public static async Task<PagingQueryableResult<T>> PagingWrapWithHasMoreAsync<T>(this IQueryable<T> list, int pageIndex = 0, int pageSize = 30, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(list, nameof(list));
 
         // Skip to the current page position and fetch pageSize + 1 to determine if there are more records
-        var skip = PagingHelper.GetSkip(pageNumber, pageSize);
+        var skip = PagingHelper.GetSkip(pageIndex, pageSize);
         var items = await list.Skip(skip).Take(pageSize + 1).ToListAsync(cancellationToken).ConfigureAwait(false);
 
         var hasMore = items.Count > pageSize;
@@ -171,7 +142,7 @@ public static class PagingExtensions
         return new PagingQueryableResult<T>
         {
             List = resultItems,
-            PageNumber = PagingHelper.GetPageNumberWithoutTotal(pageNumber),
+            PageIndex = PagingHelper.GetPageIndexWithoutTotal(pageIndex),
             Total = null,
             HasMore = hasMore
         };
@@ -183,13 +154,13 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the queryable collection.</typeparam>
     /// <param name="list">The source queryable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed).</param>
+    /// <param name="pageIndex">The page index (0-indexed).</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="threshold">The maximum count threshold.</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A task that represents the asynchronous operation, containing a paged result with total capped at threshold.</returns>
     /// <exception cref="ArgumentNullException">Thrown when list is null.</exception>
-    public static async Task<PagingQueryableResult<T>> PagingWrapWithThresholdAsync<T>(this IQueryable<T> list, int pageNumber, int pageSize, int threshold, CancellationToken cancellationToken = default)
+    public static async Task<PagingQueryableResult<T>> PagingWrapWithThresholdAsync<T>(this IQueryable<T> list, int pageIndex, int pageSize, int threshold, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(list, nameof(list));
 
@@ -199,8 +170,8 @@ public static class PagingExtensions
 
         return new PagingQueryableResult<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, total),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total),
             Total = total,
             HasMore = countUpToThreshold > threshold ? true : null
         };
@@ -209,13 +180,13 @@ public static class PagingExtensions
     /// <summary>
     /// Internal method to wrap with full count (used by options-based overload).
     /// </summary>
-    private static async Task<PagingQueryableResult<T>> PagingWrapWithCountAsync<T>(IQueryable<T> list, int pageNumber, int pageSize, CancellationToken cancellationToken)
+    private static async Task<PagingQueryableResult<T>> PagingWrapWithCountAsync<T>(IQueryable<T> list, int pageIndex, int pageSize, CancellationToken cancellationToken)
     {
         var total = await list.CountAsync(cancellationToken).ConfigureAwait(false);
         return new PagingQueryableResult<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, total),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total),
             Total = total
         };
     }
@@ -223,7 +194,7 @@ public static class PagingExtensions
     /// <summary>
     /// Internal method to wrap with approximate count using the provider delegate.
     /// </summary>
-    private static async Task<PagingQueryableResult<T>> PagingWrapWithApproximateAsync<T>(IQueryable<T> list, int pageNumber, int pageSize, PagingOptions options, CancellationToken cancellationToken)
+    private static async Task<PagingQueryableResult<T>> PagingWrapWithApproximateAsync<T>(IQueryable<T> list, int pageIndex, int pageSize, PagingOptions options, CancellationToken cancellationToken)
     {
         if (options.ApproximateCountProvider == null)
             throw new InvalidOperationException(
@@ -235,8 +206,8 @@ public static class PagingExtensions
 
         return new PagingQueryableResult<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, total),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total),
             Total = total
         };
     }
@@ -246,13 +217,13 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the queryable collection.</typeparam>
     /// <param name="list">The source queryable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 30.</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A task that represents the asynchronous operation, containing a paged result with enumerable list.</returns>
-    public static async Task<PagingWithEnumerableList<T>> PagingWrapWithEnumerableListAsync<T>(this IQueryable<T> list, int pageNumber = 1, int pageSize = 30, CancellationToken cancellationToken = default)
+    public static async Task<PagingWithEnumerableList<T>> PagingWrapWithEnumerableListAsync<T>(this IQueryable<T> list, int pageIndex = 0, int pageSize = 30, CancellationToken cancellationToken = default)
     {
-        var pagedQueryable = await list.PagingWrapAsync(pageNumber, pageSize, cancellationToken);
+        var pagedQueryable = await list.PagingWrapAsync(pageIndex, pageSize, cancellationToken);
         return await pagedQueryable.ToPagingWithEnumerableListAsync(cancellationToken);
     }
 
@@ -275,7 +246,7 @@ public static class PagingExtensions
         return new PagingWithEnumerableList<T>
         {
             List = list,
-            PageNumber = paging.PageNumber,
+            PageIndex = paging.PageIndex,
             Total = paging.Total
         };
     }
@@ -297,7 +268,7 @@ public static class PagingExtensions
         return new PagingEnumerableResult<T>
         {
             List = list,
-            PageNumber = paging.PageNumber,
+            PageIndex = paging.PageIndex,
             Total = paging.Total,
             HasMore = paging.HasMore
         };

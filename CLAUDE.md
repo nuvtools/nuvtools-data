@@ -76,7 +76,7 @@ The paging system has two variants:
 - `PagingWithEnumerableList<T>`: For in-memory collections with IEnumerable
 
 Both inherit from `PagingBase<T, R>` which provides:
-- `PageNumber`: Current page (1-indexed, validated via `PagingHelper.GetPageNumber`)
+- `PageIndex`: Current page (0-indexed, validated via `PagingHelper.GetPageIndex`)
 - `Total`: Total record count
 - `List`: The paged data
 

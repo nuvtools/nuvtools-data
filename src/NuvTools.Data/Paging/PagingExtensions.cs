@@ -1,4 +1,4 @@
-﻿using NuvTools.Data.Paging.Enumerations;
+using NuvTools.Data.Paging.Enumerations;
 
 namespace NuvTools.Data.Paging;
 
@@ -13,16 +13,16 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the collection.</typeparam>
     /// <param name="list">The source enumerable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 50.</param>
     /// <returns>A paged result containing the requested page of data with total count.</returns>
-    public static PagingWithEnumerableList<T> PagingWrap<T>(this IEnumerable<T> list, int pageNumber = 1, int pageSize = 50)
+    public static PagingWithEnumerableList<T> PagingWrap<T>(this IEnumerable<T> list, int pageIndex = 0, int pageSize = 50)
     {
         var total = list.Count();
         return new PagingWithEnumerableList<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, total),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total),
             Total = total
         };
     }
@@ -32,11 +32,11 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the collection.</typeparam>
     /// <param name="list">The source enumerable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed).</param>
+    /// <param name="pageIndex">The page index (0-indexed).</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="options">The paging options controlling count behavior.</param>
     /// <returns>A paged result with optional total count based on the options.</returns>
-    public static PagingEnumerableResult<T> PagingWrap<T>(this IEnumerable<T> list, int pageNumber, int pageSize, PagingOptions options)
+    public static PagingEnumerableResult<T> PagingWrap<T>(this IEnumerable<T> list, int pageIndex, int pageSize, PagingOptions options)
     {
         ArgumentNullException.ThrowIfNull(list);
         ArgumentNullException.ThrowIfNull(options);
@@ -46,18 +46,18 @@ public static class PagingExtensions
         {
             return new PagingEnumerableResult<T>
             {
-                List = list.Paging(pageNumber, pageSize),
-                PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, options.PreCalculatedTotal.Value),
+                List = list.Paging(pageIndex, pageSize),
+                PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, options.PreCalculatedTotal.Value),
                 Total = options.PreCalculatedTotal.Value
             };
         }
 
         return options.CountMode switch
         {
-            CountMode.Skip => PagingWrapSkipCount(list, pageNumber, pageSize),
-            CountMode.HasMore => PagingWrapWithHasMore(list, pageNumber, pageSize),
-            CountMode.Threshold => PagingWrapWithThreshold(list, pageNumber, pageSize, options.CountThreshold),
-            _ => PagingWrapWithCount(list, pageNumber, pageSize) // CountMode.Always
+            CountMode.Skip => PagingWrapSkipCount(list, pageIndex, pageSize),
+            CountMode.HasMore => PagingWrapWithHasMore(list, pageIndex, pageSize),
+            CountMode.Threshold => PagingWrapWithThreshold(list, pageIndex, pageSize, options.CountThreshold),
+            _ => PagingWrapWithCount(list, pageIndex, pageSize) // CountMode.Always
         };
     }
 
@@ -67,17 +67,17 @@ public static class PagingExtensions
     /// <typeparam name="T">The type of items in the collection.</typeparam>
     /// <param name="list">The source enumerable collection.</param>
     /// <param name="total">The pre-calculated total count.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 50.</param>
     /// <returns>A paged result using the provided total.</returns>
-    public static PagingEnumerableResult<T> PagingWrapWithTotal<T>(this IEnumerable<T> list, int total, int pageNumber = 1, int pageSize = 50)
+    public static PagingEnumerableResult<T> PagingWrapWithTotal<T>(this IEnumerable<T> list, int total, int pageIndex = 0, int pageSize = 50)
     {
         ArgumentNullException.ThrowIfNull(list);
 
         return new PagingEnumerableResult<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, total),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total),
             Total = total
         };
     }
@@ -88,17 +88,17 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the collection.</typeparam>
     /// <param name="list">The source enumerable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 50.</param>
     /// <returns>A paged result with Total set to null.</returns>
-    public static PagingEnumerableResult<T> PagingWrapSkipCount<T>(this IEnumerable<T> list, int pageNumber = 1, int pageSize = 50)
+    public static PagingEnumerableResult<T> PagingWrapSkipCount<T>(this IEnumerable<T> list, int pageIndex = 0, int pageSize = 50)
     {
         ArgumentNullException.ThrowIfNull(list);
 
         return new PagingEnumerableResult<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumberWithoutTotal(pageNumber),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndexWithoutTotal(pageIndex),
             Total = null
         };
     }
@@ -109,15 +109,15 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the collection.</typeparam>
     /// <param name="list">The source enumerable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 50.</param>
     /// <returns>A paged result with HasMore indicator instead of total count.</returns>
-    public static PagingEnumerableResult<T> PagingWrapWithHasMore<T>(this IEnumerable<T> list, int pageNumber = 1, int pageSize = 50)
+    public static PagingEnumerableResult<T> PagingWrapWithHasMore<T>(this IEnumerable<T> list, int pageIndex = 0, int pageSize = 50)
     {
         ArgumentNullException.ThrowIfNull(list);
 
         // Fetch pageSize + 1 to determine if there are more records
-        var skip = PagingHelper.GetSkip(pageNumber, pageSize);
+        var skip = PagingHelper.GetSkip(pageIndex, pageSize);
         var items = list.Skip(skip).Take(pageSize + 1).ToList();
 
         var hasMore = items.Count > pageSize;
@@ -126,7 +126,7 @@ public static class PagingExtensions
         return new PagingEnumerableResult<T>
         {
             List = resultItems,
-            PageNumber = PagingHelper.GetPageNumberWithoutTotal(pageNumber),
+            PageIndex = PagingHelper.GetPageIndexWithoutTotal(pageIndex),
             Total = null,
             HasMore = hasMore
         };
@@ -137,11 +137,11 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the collection.</typeparam>
     /// <param name="list">The source enumerable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed).</param>
+    /// <param name="pageIndex">The page index (0-indexed).</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="threshold">The maximum count threshold.</param>
     /// <returns>A paged result with total capped at the threshold.</returns>
-    public static PagingEnumerableResult<T> PagingWrapWithThreshold<T>(this IEnumerable<T> list, int pageNumber, int pageSize, int threshold)
+    public static PagingEnumerableResult<T> PagingWrapWithThreshold<T>(this IEnumerable<T> list, int pageIndex, int pageSize, int threshold)
     {
         ArgumentNullException.ThrowIfNull(list);
 
@@ -151,8 +151,8 @@ public static class PagingExtensions
 
         return new PagingEnumerableResult<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, total),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total),
             Total = total,
             HasMore = countUpToThreshold > threshold ? true : null
         };
@@ -161,13 +161,13 @@ public static class PagingExtensions
     /// <summary>
     /// Internal method to wrap with full count (used by options-based overload).
     /// </summary>
-    private static PagingEnumerableResult<T> PagingWrapWithCount<T>(IEnumerable<T> list, int pageNumber, int pageSize)
+    private static PagingEnumerableResult<T> PagingWrapWithCount<T>(IEnumerable<T> list, int pageIndex, int pageSize)
     {
         var total = list.Count();
         return new PagingEnumerableResult<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, total),
+            List = list.Paging(pageIndex, pageSize),
+            PageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total),
             Total = total
         };
     }
@@ -177,20 +177,20 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the queryable collection.</typeparam>
     /// <param name="list">The source queryable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 50.</param>
     /// <returns>A queryable collection containing only the items for the requested page.</returns>
-    public static IQueryable<T> Paging<T>(this IQueryable<T> list, int pageNumber = 1, int pageSize = 50) => list.Skip(PagingHelper.GetSkip(pageNumber, pageSize)).Take(pageSize);
+    public static IQueryable<T> Paging<T>(this IQueryable<T> list, int pageIndex = 0, int pageSize = 50) => list.Skip(PagingHelper.GetSkip(pageIndex, pageSize)).Take(pageSize);
 
     /// <summary>
     /// Applies paging to an IEnumerable collection by skipping and taking the appropriate number of items.
     /// </summary>
     /// <typeparam name="T">The type of items in the enumerable collection.</typeparam>
     /// <param name="list">The source enumerable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 50.</param>
     /// <returns>An enumerable collection containing only the items for the requested page.</returns>
-    public static IEnumerable<T> Paging<T>(this IEnumerable<T> list, int pageNumber = 1, int pageSize = 50) => list.Skip(PagingHelper.GetSkip(pageNumber, pageSize)).Take(pageSize);
+    public static IEnumerable<T> Paging<T>(this IEnumerable<T> list, int pageIndex = 0, int pageSize = 50) => list.Skip(PagingHelper.GetSkip(pageIndex, pageSize)).Take(pageSize);
 
     #region Conversions
 
@@ -207,7 +207,7 @@ public static class PagingExtensions
         return new PagingWithEnumerableList<T>
         {
             List = [.. paging.List],
-            PageNumber = paging.PageNumber,
+            PageIndex = paging.PageIndex,
             Total = paging.Total
         };
     }
@@ -225,7 +225,7 @@ public static class PagingExtensions
         return new PagingEnumerableResult<T>
         {
             List = [.. paging.List],
-            PageNumber = paging.PageNumber,
+            PageIndex = paging.PageIndex,
             Total = paging.Total,
             HasMore = paging.HasMore
         };

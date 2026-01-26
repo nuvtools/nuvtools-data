@@ -54,6 +54,7 @@ Specialized helpers for SQL Server with EF Core:
 - **Simple Registration**: `AddDatabase` and `AddDatabaseByConnectionName` extension methods
 - **Configuration Integration**: Load connection strings from `appsettings.json`
 - **SQL Server Options**: Configure SQL Server-specific options via `SqlServerDbContextOptionsBuilder`
+- **Approximate Count**: Auto-wired approximate count using `sys.dm_db_partition_stats` via `PagingWrapAsync`
 
 ```bash
 dotnet add package NuvTools.Data.EntityFrameworkCore.SqlServer
@@ -67,6 +68,7 @@ Specialized helpers for PostgreSQL with EF Core:
 - **Simple Registration**: `AddDatabase` and `AddDatabaseByConnectionName` extension methods
 - **Snake Case Convention**: `UseSnakeCaseNamingConvention` for PostgreSQL naming standards
 - **Npgsql Options**: Configure PostgreSQL-specific options via `NpgsqlDbContextOptionsBuilder`
+- **Approximate Count**: Auto-wired approximate count using `pg_class.reltuples` via `PagingWrapAsync`
 
 ```bash
 dotnet add package NuvTools.Data.EntityFrameworkCore.PostgreSQL
@@ -79,15 +81,192 @@ dotnet add package NuvTools.Data.EntityFrameworkCore.PostgreSQL
 ```csharp
 using NuvTools.Data.Paging;
 
-// In-memory paging
+// In-memory paging (0-indexed)
 var items = new List<Product> { /* ... */ };
-var pagedResult = items.PagingWrap(pageNumber: 1, pageSize: 20);
+var pagedResult = items.PagingWrap(pageIndex: 0, pageSize: 20);
 
-Console.WriteLine($"Page {pagedResult.PageNumber} of {Math.Ceiling(pagedResult.Total / 20.0)}");
+Console.WriteLine($"Page {pagedResult.PageIndex + 1} of {Math.Ceiling(pagedResult.Total / 20.0)}");
 foreach (var item in pagedResult.List)
 {
     Console.WriteLine(item.Name);
 }
+```
+
+### Advanced Paging with Count Strategies
+
+The paging system supports multiple count strategies via `PagingOptions` to optimize performance for large datasets:
+
+| Count Mode | Description | Use Case |
+|------------|-------------|----------|
+| `Always` | Execute COUNT query (default) | Small to medium datasets |
+| `Skip` | No count query, Total = null | Infinite scroll, "Load more" |
+| `HasMore` | Fetch N+1 to detect more pages | Mobile apps, simple pagination |
+| `Threshold` | Count up to a limit (e.g., 10,000+) | Large datasets with UI limit |
+| `Approximate` | Use database metadata for instant count | Very large tables (millions of rows) |
+
+#### Skip Count (Infinite Scroll)
+
+```csharp
+using NuvTools.Data.Paging;
+
+// For infinite scroll - no count query executed
+var result = await query.PagingWrapAsync(pageIndex, pageSize, PagingOptions.SkipCount);
+
+// Total is null, just iterate through results
+while (result.List.Any())
+{
+    foreach (var item in result.List) { /* process */ }
+    pageIndex++;
+    result = await query.PagingWrapAsync(pageIndex, pageSize, PagingOptions.SkipCount);
+}
+```
+
+#### HasMore Pattern (Fetch N+1)
+
+```csharp
+using NuvTools.Data.Paging;
+
+// Fetches pageSize + 1 records to determine if more exist
+var result = await query.PagingWrapAsync(pageIndex, pageSize, PagingOptions.UseHasMore);
+
+// Check if there are more pages without running a count query
+if (result.HasMore == true)
+{
+    Console.WriteLine("Load more...");
+}
+```
+
+#### Threshold Counting
+
+```csharp
+using NuvTools.Data.Paging;
+
+// Count only up to 10,000 - useful for "10,000+ results" UI
+var result = await query.PagingWrapAsync(pageIndex, pageSize, PagingOptions.WithThreshold(10000));
+
+if (result.HasMore == true)
+{
+    Console.WriteLine($"Showing {result.Total:N0}+ results");
+}
+else
+{
+    Console.WriteLine($"Showing {result.Total:N0} results");
+}
+```
+
+#### Approximate Count (Database Metadata)
+
+For very large tables, use database system metadata to get an instant approximate row count. Use the database-specific `PagingWrapAsync` extension that automatically wires up the approximate count query.
+
+**SQL Server (Recommended)**
+
+```csharp
+using NuvTools.Data.EntityFrameworkCore.SqlServer.Paging;
+using NuvTools.Data.Paging;
+
+public class ProductService
+{
+    private readonly MyDbContext _context;
+
+    public ProductService(MyDbContext context) => _context = context;
+
+    public async Task<PagingQueryableResult<Product>> GetProductsAsync(int pageIndex, int pageSize)
+    {
+        var query = _context.Products.Where(p => p.IsActive);
+
+        // Auto-wires approximate count using sys.dm_db_partition_stats
+        return await query.PagingWrapAsync(_context, pageIndex, pageSize, PagingOptions.UseApproximate);
+    }
+
+    public async Task<long> GetApproximateProductCountAsync()
+    {
+        // Get approximate count directly
+        return await PagingExtensions.GetApproximateCountAsync<Product>(_context);
+    }
+}
+```
+
+**PostgreSQL**
+
+```csharp
+using NuvTools.Data.EntityFrameworkCore.PostgreSQL.Paging;
+using NuvTools.Data.Paging;
+
+public class ProductService
+{
+    private readonly MyDbContext _context;
+
+    public ProductService(MyDbContext context) => _context = context;
+
+    public async Task<PagingQueryableResult<Product>> GetProductsAsync(int pageIndex, int pageSize)
+    {
+        var query = _context.Products.Where(p => p.IsActive);
+
+        // Auto-wires approximate count using pg_class.reltuples
+        return await query.PagingWrapAsync(_context, pageIndex, pageSize, PagingOptions.UseApproximate);
+    }
+}
+```
+
+**Alternative: Custom Provider Delegate**
+
+For custom scenarios, you can provide your own approximate count delegate:
+
+```csharp
+using NuvTools.Data.Paging;
+
+var options = PagingOptions.WithApproximateCount(async cancellationToken =>
+{
+    // Custom approximate count logic
+    return await _context.Database
+        .SqlQueryRaw<long>("SELECT your_custom_count_query")
+        .FirstOrDefaultAsync(cancellationToken);
+});
+
+var result = await query.PagingWrapAsync(pageIndex, pageSize, options);
+```
+
+#### Pre-Calculated Total (Cached Count)
+
+```csharp
+using NuvTools.Data.Paging;
+
+// Use a cached total to skip the count query
+var cachedTotal = await _cache.GetOrCreateAsync("products_count", async entry =>
+{
+    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
+    return await _context.Products.CountAsync();
+});
+
+var result = await query.PagingWrapAsync(pageIndex, pageSize, PagingOptions.WithTotal(cachedTotal));
+```
+
+#### Using PagingFilter with Sorting
+
+```csharp
+using NuvTools.Data.Paging;
+using NuvTools.Data.Sorting.Enumerations;
+
+public enum ProductSortColumn { Name, Price, CreatedAt }
+
+// Define a filter with paging and sorting
+var filter = new PagingFilter<ProductSortColumn>
+{
+    PageIndex = 0,
+    PageSize = 20,
+    SortColumn = ProductSortColumn.Price,
+    SortDirection = SortDirection.DESC,
+    Options = PagingOptions.UseHasMore  // Optional: configure count strategy
+};
+
+// Apply in your service
+var query = _context.Products
+    .Where(p => p.IsActive)
+    .Sort(filter.SortColumn, filter.SortDirection);
+
+var result = filter.Options != null
+    ? await query.PagingWrapAsync(filter.PageIndex, filter.PageSize, filter.Options)
+    : await query.PagingWrapAsync(filter.PageIndex, filter.PageSize);
 ```
 
 ### Sorting (NuvTools.Data)
@@ -180,15 +359,35 @@ public class ProductService
 
 ```csharp
 using NuvTools.Data.EntityFrameworkCore.Paging;
+using NuvTools.Data.Paging;
 
-public async Task<PagingWithEnumerableList<Product>> GetProductsAsync(int pageNumber, int pageSize)
+public class ProductService
 {
-    var query = _context.Products.Where(p => p.IsActive);
+    private readonly MyDbContext _context;
 
-    // PagingWrapAsync materializes the data
-    var pagedResult = await query.PagingWrapWithEnumerableListAsync(pageNumber, pageSize);
+    // Basic paging with exact count (0-indexed)
+    public async Task<PagingWithEnumerableList<Product>> GetProductsAsync(int pageIndex, int pageSize)
+    {
+        var query = _context.Products.Where(p => p.IsActive);
+        return await query.PagingWrapWithEnumerableListAsync(pageIndex, pageSize);
+    }
 
-    return pagedResult;
+    // Optimized paging for large datasets using HasMore pattern
+    public async Task<PagingQueryableResult<Product>> GetProductsOptimizedAsync(int pageIndex, int pageSize)
+    {
+        var query = _context.Products.Where(p => p.IsActive);
+        return await query.PagingWrapAsync(pageIndex, pageSize, PagingOptions.UseHasMore);
+    }
+
+    // Paging with approximate count for very large tables (SQL Server)
+    // Use NuvTools.Data.EntityFrameworkCore.SqlServer.Paging namespace
+    public async Task<PagingQueryableResult<Product>> GetProductsWithApproxCountAsync(int pageIndex, int pageSize)
+    {
+        var query = _context.Products.Where(p => p.IsActive);
+
+        // Auto-wires approximate count - just pass the context and PagingOptions.UseApproximate
+        return await query.PagingWrapAsync(_context, pageIndex, pageSize, PagingOptions.UseApproximate);
+    }
 }
 ```
 

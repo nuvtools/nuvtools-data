@@ -1,4 +1,4 @@
-﻿namespace NuvTools.Data.Paging;
+namespace NuvTools.Data.Paging;
 
 /// <summary>
 /// Helper methods for paging calculations.
@@ -6,39 +6,40 @@
 public static class PagingHelper
 {
     /// <summary>
-    /// Calculates the valid page number, ensuring it doesn't exceed the total number of pages.
+    /// Calculates the valid page index, ensuring it doesn't exceed the total number of pages.
     /// </summary>
-    /// <param name="index">The requested page number (1-indexed).</param>
+    /// <param name="pageIndex">The requested page index (0-indexed).</param>
     /// <param name="pageSize">The number of items per page.</param>
     /// <param name="total">The total number of items.</param>
-    /// <returns>A valid page number that doesn't exceed the total pages available.</returns>
-    public static int GetPageNumber(int index, int pageSize, int total)
+    /// <returns>A valid page index that doesn't exceed the total pages available.</returns>
+    public static int GetPageIndex(int pageIndex, int pageSize, int total)
     {
-        var totalPage = total > 0 ? (int)Math.Ceiling(total / (decimal)pageSize) : 0;
-        return (totalPage - index) < 0 ? totalPage : index;
+        var totalPages = total > 0 ? (int)Math.Ceiling(total / (decimal)pageSize) : 0;
+        var maxIndex = totalPages > 0 ? totalPages - 1 : 0;
+        return pageIndex < 0 ? 0 : (pageIndex > maxIndex ? maxIndex : pageIndex);
     }
 
     /// <summary>
     /// Calculates the number of items to skip for pagination.
     /// </summary>
-    /// <param name="index">The page number (1-indexed).</param>
+    /// <param name="pageIndex">The page index (0-indexed).</param>
     /// <param name="size">The page size.</param>
     /// <returns>The number of items to skip.</returns>
-    public static int GetSkip(int index, int size)
+    public static int GetSkip(int pageIndex, int size)
     {
-        if (index < 1) index = 1;
-        return (index - 1) * size;
+        if (pageIndex < 0) pageIndex = 0;
+        return pageIndex * size;
     }
 
     /// <summary>
-    /// Gets the page number when the total is unknown.
-    /// Ensures the page number is at least 1.
+    /// Gets the page index when the total is unknown.
+    /// Ensures the page index is at least 0.
     /// </summary>
-    /// <param name="index">The requested page number (1-indexed).</param>
-    /// <returns>A valid page number (at least 1).</returns>
-    public static int GetPageNumberWithoutTotal(int index)
+    /// <param name="pageIndex">The requested page index (0-indexed).</param>
+    /// <returns>A valid page index (at least 0).</returns>
+    public static int GetPageIndexWithoutTotal(int pageIndex)
     {
-        return index < 1 ? 1 : index;
+        return pageIndex < 0 ? 0 : pageIndex;
     }
 
     /// <summary>

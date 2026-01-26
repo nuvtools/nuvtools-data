@@ -9,9 +9,9 @@ namespace NuvTools.Data.Paging;
 public abstract class PagingResult<T, R> where T : IEnumerable<R>
 {
     /// <summary>
-    /// Gets or sets the current page number (1-indexed).
+    /// Gets or sets the current page index (0-indexed).
     /// </summary>
-    public required int PageNumber { get; set; }
+    public required int PageIndex { get; set; }
 
     /// <summary>
     /// Gets or sets the total number of items across all pages.
@@ -49,7 +49,7 @@ public abstract class PagingResult<T, R> where T : IEnumerable<R>
             return HasMore.Value;
 
         if (Total.HasValue)
-            return PageNumber * pageSize < Total.Value;
+            return (PageIndex + 1) * pageSize < Total.Value;
 
         return null;
     }

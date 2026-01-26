@@ -3,14 +3,14 @@
 namespace NuvTools.Data.Paging;
 
 /// <summary>
-/// Represents a filter for paging operations containing page number and page size.
+/// Represents a filter for paging operations containing page index and page size.
 /// </summary>
 public class PagingFilter
 {
     /// <summary>
-    /// Gets or sets the page number (1-indexed). Defaults to 1.
+    /// Gets or sets the page index (0-indexed). Defaults to 0.
     /// </summary>
-    public int PageNumber { get; set; } = 1;
+    public int PageIndex { get; set; } = 0;
 
     /// <summary>
     /// Gets or sets the number of items per page. Defaults to 30.

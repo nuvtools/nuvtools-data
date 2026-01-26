@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -91,8 +91,9 @@ public static class ServiceCollectionExtensions
         Action<NpgsqlDbContextOptionsBuilder>? npgsqlOptionsAction = null,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
-        return services
-            .AddDbContext<TContext>(options => options.UseNpgsql(connectionString, npgsqlOptionsAction),
-                                    contextLifetime: contextLifetime);
+        services.AddDbContext<TContext>(options => options.UseNpgsql(connectionString, npgsqlOptionsAction),
+                                        contextLifetime: contextLifetime);
+
+        return services;
     }
 }

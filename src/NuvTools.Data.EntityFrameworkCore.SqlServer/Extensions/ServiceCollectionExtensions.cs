@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
@@ -91,8 +91,9 @@ public static class ServiceCollectionExtensions
         Action<SqlServerDbContextOptionsBuilder>? sqlServerOptionsAction = null,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
-        return services
-            .AddDbContext<TContext>(options => options
-                .UseSqlServer(connectionString, sqlServerOptionsAction), contextLifetime: contextLifetime);
+        services.AddDbContext<TContext>(options => options
+            .UseSqlServer(connectionString, sqlServerOptionsAction), contextLifetime: contextLifetime);
+
+        return services;
     }
 }
