@@ -212,9 +212,9 @@ await _context.AddOrRemoveFromListAsync(products, p => p.Id);
 ## 📋 Requirements
 
 - **.NET SDK**: 8.0, 9.0, or 10.0
-- **Entity Framework Core**: 10.0.0 (for EF Core libraries)
+- **Entity Framework Core**: 10.0.2 (for EF Core libraries)
 - **Database Providers**:
-  - SQL Server: Microsoft.EntityFrameworkCore.SqlServer 10.0.0
+  - SQL Server: Microsoft.EntityFrameworkCore.SqlServer 10.0.2
   - PostgreSQL: Npgsql.EntityFrameworkCore.PostgreSQL 10.0.0
 
 ## 🔧 Development
@@ -244,6 +244,12 @@ dotnet build NuvTools.Data.slnx -c Release
 Packages are automatically generated in `bin/Release` folders when building in Release configuration.
 
 ## 📝 Version History
+
+### Version 10.0.2
+- Updated to Entity Framework Core 10.0.2
+- Updated all Microsoft packages to version 10.0.2
+- Improved package descriptions and tags
+- Copyright updated to 2026
 
 ### Version 10.0.0
 - Added .NET 10 support

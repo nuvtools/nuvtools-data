@@ -120,7 +120,6 @@ Both support:
 ## Code Standards
 
 ### Assembly Configuration
-- All projects use strong name signing (`.snk` files)
 - `ImplicitUsings` enabled
 - `Nullable` reference types enabled
 - XML documentation generation enabled (`GenerateDocumentationFile`)
@@ -131,7 +130,7 @@ Both support:
 - IDE0063 (simple using statements): Suppressed
 
 ### NuGet Package Settings
-- Version: 9.5.0 (keep synchronized across all projects)
+- Version: 10.0.2 (keep synchronized across all projects)
 - All packages include icon.png, LICENSE, and README.md
 - Repository: https://github.com/nuvtools/nuvtools-data
 
@@ -141,19 +140,19 @@ Both support:
 - No external dependencies (ORM-agnostic)
 
 ### EF Core Libraries
-- Microsoft.EntityFrameworkCore 10.0.0
-- Microsoft.Extensions.Configuration.Json 10.0.0
-- NuvTools.Common 9.5.0
+- Microsoft.EntityFrameworkCore 10.0.2
+- Microsoft.Extensions.Configuration.Json 10.0.2
+- NuvTools.Common 10.0.2
 
 ### SQL Server Library
-- Microsoft.EntityFrameworkCore.SqlServer 10.0.0
+- Microsoft.EntityFrameworkCore.SqlServer 10.0.2
 
 ### PostgreSQL Library
 - Npgsql.EntityFrameworkCore.PostgreSQL 10.0.0
 
 ### Test Libraries
 - NUnit 4.4.0
-- NUnit3TestAdapter 5.2.0
+- NUnit3TestAdapter 6.1.0
 - Microsoft.NET.Test.Sdk 18.0.1
 
 ## Development Guidelines

@@ -4,10 +4,10 @@
 		<TargetFrameworks>net8;net9;net10.0</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Authors>Nuv Tools</Authors>
-		<Copyright>Copyright © 2025 Nuv Tools</Copyright>
+		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>Library containg helpers to manipulate data.</Description>
-		<Version>10.0.0</Version>
+		<Description>Library containing helpers to manipulate data with paging, sorting, and filtering capabilities.</Description>
+		<Version>10.0.2</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -18,7 +18,7 @@
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>Nuv Tools Data Paging Sorting</PackageTags>
+		<PackageTags>NuvTools Data Paging Sorting Filtering ORM-Agnostic dotnet</PackageTags>
 		<ImplicitUsings>true</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
