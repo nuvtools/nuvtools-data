@@ -79,11 +79,11 @@ dotnet add package NuvTools.Data.EntityFrameworkCore.PostgreSQL
 ```csharp
 using NuvTools.Data.Paging;
 
-// In-memory paging
+// In-memory paging (0-indexed)
 var items = new List<Product> { /* ... */ };
-var pagedResult = items.PagingWrap(pageNumber: 1, pageSize: 20);
+var pagedResult = items.PagingWrap(pageIndex: 0, pageSize: 20);
 
-Console.WriteLine($"Page {pagedResult.PageNumber} of {Math.Ceiling(pagedResult.Total / 20.0)}");
+Console.WriteLine($"Page {pagedResult.PageIndex + 1} of {Math.Ceiling(pagedResult.Total / 20.0)}");
 foreach (var item in pagedResult.List)
 {
     Console.WriteLine(item.Name);
@@ -181,12 +181,12 @@ public class ProductService
 ```csharp
 using NuvTools.Data.EntityFrameworkCore.Paging;
 
-public async Task<PagingWithEnumerableList<Product>> GetProductsAsync(int pageNumber, int pageSize)
+public async Task<PagingWithEnumerableList<Product>> GetProductsAsync(int pageIndex, int pageSize)
 {
     var query = _context.Products.Where(p => p.IsActive);
 
-    // PagingWrapAsync materializes the data
-    var pagedResult = await query.PagingWrapWithEnumerableListAsync(pageNumber, pageSize);
+    // PagingWrapAsync materializes the data (0-indexed)
+    var pagedResult = await query.PagingWrapWithEnumerableListAsync(pageIndex, pageSize);
 
     return pagedResult;
 }
@@ -212,9 +212,9 @@ await _context.AddOrRemoveFromListAsync(products, p => p.Id);
 ## 📋 Requirements
 
 - **.NET SDK**: 8.0, 9.0, or 10.0
-- **Entity Framework Core**: 10.0.2 (for EF Core libraries)
+- **Entity Framework Core**: 10.1.0 (for EF Core libraries)
 - **Database Providers**:
-  - SQL Server: Microsoft.EntityFrameworkCore.SqlServer 10.0.2
+  - SQL Server: Microsoft.EntityFrameworkCore.SqlServer 10.1.0
   - PostgreSQL: Npgsql.EntityFrameworkCore.PostgreSQL 10.0.0
 
 ## 🔧 Development
@@ -244,6 +244,12 @@ dotnet build NuvTools.Data.slnx -c Release
 Packages are automatically generated in `bin/Release` folders when building in Release configuration.
 
 ## 📝 Version History
+
+### Version 10.1.0
+- **Breaking Change**: Paging system migrated from 1-based `PageNumber` to 0-based `PageIndex`
+- Property `PageNumber` renamed to `PageIndex` in `PagingBase`, `PagingFilter`, and paging results
+- Method `GetPageNumber()` renamed to `GetPageIndex()` in `PagingHelper`
+- Default page parameter changed from `1` to `0`
 
 ### Version 10.0.2
 - Updated to Entity Framework Core 10.0.2

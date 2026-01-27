@@ -8,9 +8,9 @@
 public abstract class PagingBase<T, R> where T : IEnumerable<R>
 {
     /// <summary>
-    /// Gets or sets the current page number (1-indexed).
+    /// Gets or sets the current page index (0-indexed).
     /// </summary>
-    public required int PageNumber { get; set; }
+    public required int PageIndex { get; set; }
 
     /// <summary>
     /// Gets or sets the total number of items across all pages.

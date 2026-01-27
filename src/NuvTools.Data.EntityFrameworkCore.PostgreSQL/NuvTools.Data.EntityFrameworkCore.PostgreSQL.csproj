@@ -8,8 +8,8 @@
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>Library containing helpers to manipulate data using Entity Framework Core for PostgreSQL with snake_case naming convention support.</Description>
-		<Version>10.0.2</Version>
+		<Description>PostgreSQL integration for NuvTools.Data.EntityFrameworkCore with simplified DbContext registration, configuration from appsettings.json, and snake_case naming convention support.</Description>
+		<Version>10.1.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -20,7 +20,7 @@
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>NuvTools Data EFCore EntityFrameworkCore PostgreSQL Postgres Npgsql DbContext dotnet</PackageTags>
+		<PackageTags>NuvTools Data EFCore EntityFrameworkCore PostgreSQL Postgres Npgsql DbContext SnakeCase DependencyInjection dotnet csharp</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -8,8 +8,8 @@
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>Library containing helpers to manipulate data using Entity Framework Core with DbContext extensions, repository pattern, and bulk operations.</Description>
-		<Version>10.0.2</Version>
+		<Description>Entity Framework Core extensions providing DbContextBase with CRUD operations, Result pattern error handling, transaction management, bulk operations, and async paging.</Description>
+		<Version>10.1.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -20,7 +20,7 @@
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>NuvTools Data EFCore EntityFrameworkCore DbContext Repository Paging Sorting dotnet</PackageTags>
+		<PackageTags>NuvTools Data EFCore EntityFrameworkCore DbContext Repository CRUD BulkOperations Paging Transaction dotnet csharp</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -6,8 +6,8 @@
 		<Authors>Nuv Tools</Authors>
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
-		<Description>Library containing helpers to manipulate data with paging, sorting, and filtering capabilities.</Description>
-		<Version>10.0.2</Version>
+		<Description>ORM-agnostic .NET library for data manipulation with paging, sorting, and filtering utilities for IQueryable and IEnumerable collections.</Description>
+		<Version>10.1.0</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -18,7 +18,7 @@
 		<RepositoryType>git</RepositoryType>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageTags>NuvTools Data Paging Sorting Filtering ORM-Agnostic dotnet</PackageTags>
+		<PackageTags>NuvTools Data Paging Sorting Filtering IQueryable IEnumerable ORM-Agnostic dotnet csharp</PackageTags>
 		<ImplicitUsings>true</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>

@@ -76,11 +76,13 @@ The paging system has two variants:
 - `PagingWithEnumerableList<T>`: For in-memory collections with IEnumerable
 
 Both inherit from `PagingBase<T, R>` which provides:
-- `PageNumber`: Current page (1-indexed, validated via `PagingHelper.GetPageNumber`)
+- `PageIndex`: Current page (0-indexed, validated via `PagingHelper.GetPageIndex`)
 - `Total`: Total record count
 - `List`: The paged data
 
 Use `PagingWrapAsync()` for async EF Core queries and `PagingWrap()` for synchronous in-memory collections.
+
+**Note:** The paging system uses 0-based indexing. The first page is `pageIndex: 0`, the second page is `pageIndex: 1`, etc.
 
 ### DbContext Extensions
 

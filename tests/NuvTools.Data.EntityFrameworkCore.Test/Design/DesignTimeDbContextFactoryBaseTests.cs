@@ -20,7 +20,7 @@ public class DesignTimeDbContextFactory : DesignTimeDbContextFactoryBase<NuvTool
 
         InitializeConfiguration(new JsonConfigurationSource { Path = "appsettings.json" });
 
-        Assert.That(Configuration.GetConnectionString("Default") == "It works!");
+        Assert.That(Configuration!.GetConnectionString("Default") == "It works!");
 
         return new NuvToolsContext(optionsBuilder.Options);
     }
@@ -34,7 +34,7 @@ public class DesignTimeDbContextFactoryBaseTests
     {
         var factory = new DesignTimeDbContextFactory();
 
-        var context = factory.CreateDbContext(null);
+        var context = factory.CreateDbContext(null!);
 
         Assert.That(context is not null);
     }

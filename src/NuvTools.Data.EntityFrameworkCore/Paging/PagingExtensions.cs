@@ -13,21 +13,22 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the queryable collection.</typeparam>
     /// <param name="list">The source queryable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 30.</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A task that represents the asynchronous operation, containing a paged result with queryable list.</returns>
     /// <exception cref="ArgumentNullException">Thrown when list is null.</exception>
-    public static async Task<PagingWithQueryableList<T>> PagingWrapAsync<T>(this IQueryable<T> list, int pageNumber = 1, int pageSize = 30, CancellationToken cancellationToken = default)
+    public static async Task<PagingWithQueryableList<T>> PagingWrapAsync<T>(this IQueryable<T> list, int pageIndex = 0, int pageSize = 30, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(list, nameof(list));
 
         var total = await list.CountAsync(cancellationToken).ConfigureAwait(false);
+        var validPageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total);
 
         return new PagingWithQueryableList<T>
         {
-            List = list.Paging(pageNumber, pageSize),
-            PageNumber = PagingHelper.GetPageNumber(pageNumber, pageSize, total),
+            List = list.Paging(validPageIndex, pageSize),
+            PageIndex = validPageIndex,
             Total = total
         };
     }
@@ -37,13 +38,13 @@ public static class PagingExtensions
     /// </summary>
     /// <typeparam name="T">The type of items in the queryable collection.</typeparam>
     /// <param name="list">The source queryable collection.</param>
-    /// <param name="pageNumber">The page number (1-indexed). Defaults to 1.</param>
+    /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 30.</param>
     /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
     /// <returns>A task that represents the asynchronous operation, containing a paged result with enumerable list.</returns>
-    public static async Task<PagingWithEnumerableList<T>> PagingWrapWithEnumerableListAsync<T>(this IQueryable<T> list, int pageNumber = 1, int pageSize = 30, CancellationToken cancellationToken = default)
+    public static async Task<PagingWithEnumerableList<T>> PagingWrapWithEnumerableListAsync<T>(this IQueryable<T> list, int pageIndex = 0, int pageSize = 30, CancellationToken cancellationToken = default)
     {
-        var pagedQueryable = await list.PagingWrapAsync(pageNumber, pageSize, cancellationToken);
+        var pagedQueryable = await list.PagingWrapAsync(pageIndex, pageSize, cancellationToken);
         return await pagedQueryable.ToPagingWithEnumerableListAsync(cancellationToken);
     }
 
@@ -66,7 +67,7 @@ public static class PagingExtensions
         return new PagingWithEnumerableList<T>
         {
             List = list,
-            PageNumber = paging.PageNumber,
+            PageIndex = paging.PageIndex,
             Total = paging.Total
         };
     }
