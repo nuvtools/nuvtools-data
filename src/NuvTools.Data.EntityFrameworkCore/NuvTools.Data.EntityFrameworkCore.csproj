@@ -9,7 +9,7 @@
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
 		<Description>Entity Framework Core extensions providing DbContextBase with CRUD operations, Result pattern error handling, transaction management, bulk operations, and async paging.</Description>
-		<Version>10.1.1</Version>
+		<Version>10.1.2</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -41,10 +41,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[9.0.13,9.1.0)" Condition="'$(TargetFramework)' == 'net8' OR '$(TargetFramework)' == 'net9'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[10.0.3,10.1.0)" Condition="'$(TargetFramework)' == 'net10.0'" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.3" />
-		<PackageReference Include="NuvTools.Common" Version="[10.0.3,10.1.0)" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[9.0.14,9.1.0)" Condition="'$(TargetFramework)' == 'net8' OR '$(TargetFramework)' == 'net9'" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="[10.0.5,10.1.0)" Condition="'$(TargetFramework)' == 'net10.0'" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
+		<PackageReference Include="NuvTools.Common" Version="[10.0.5,10.1.0)" />
 	</ItemGroup>
 
 	<ItemGroup>
