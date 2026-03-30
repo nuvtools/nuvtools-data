@@ -73,8 +73,17 @@ public static class DbContextWithListExtensions
             {
                 var key = keySelector(entity);
                 var dbEntity = dbEntities.First(e => keySelector(e).Equals(key));
-                context.Entry(dbEntity).CurrentValues.SetValues(entity);
-                context.Entry(dbEntity).State = EntityState.Modified;
+
+                var entry = context.Entry(dbEntity);
+                var keyProperties = entry.Metadata.FindPrimaryKey()!.Properties;
+                var savedKeyValues = keyProperties.Select(p => entry.Property(p.Name).CurrentValue).ToList();
+
+                entry.CurrentValues.SetValues(entity);
+
+                for (int i = 0; i < keyProperties.Count; i++)
+                    entry.Property(keyProperties[i].Name).CurrentValue = savedKeyValues[i];
+
+                entry.State = EntityState.Modified;
             }
         }
 

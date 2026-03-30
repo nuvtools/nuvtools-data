@@ -5,7 +5,7 @@
 
 Nuv Tools Data Libraries are a set of .NET libraries designed to simplify and standardize data access and manipulation. They provide abstractions and helpers for common data operations, as well as seamless integration with Entity Framework Core for SQL Server and PostgreSQL.
 
-## 🎯 Key Features
+## Key Features
 
 - **Multi-Framework Support**: .NET 8, .NET 9, and .NET 10
 - **ORM-Agnostic Core**: Base paging and sorting utilities work with any data source
@@ -15,7 +15,7 @@ Nuv Tools Data Libraries are a set of .NET libraries designed to simplify and st
 - **Bulk Operations**: Efficient bulk add, update, and remove operations
 - **Well-Documented**: Comprehensive XML documentation for IntelliSense support
 
-## 📦 Libraries Overview
+## Libraries Overview
 
 ### NuvTools.Data
 
@@ -72,7 +72,7 @@ Specialized helpers for PostgreSQL with EF Core:
 dotnet add package NuvTools.Data.EntityFrameworkCore.PostgreSQL
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Basic Paging (NuvTools.Data)
 
