@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using NuvTools.Data.EntityFrameworkCore.Paging;
 using NuvTools.Data.Paging;
+using NuvTools.Data.Paging.Enumerations;
 
 namespace NuvTools.Data.EntityFrameworkCore.Test.Paging;
 
@@ -272,7 +273,7 @@ public class PagingExtensionsTests
         var cts = new CancellationTokenSource();
 
         // Act
-        var result = await query.PagingWrapAsync(0, 10, cts.Token);
+        var result = await query.PagingWrapAsync(0, 10, cancellationToken: cts.Token);
 
         // Assert
         Assert.That(result.PageIndex, Is.EqualTo(0));
@@ -288,7 +289,132 @@ public class PagingExtensionsTests
         cts.Cancel();
 
         // Act & Assert
-        Assert.ThrowsAsync<OperationCanceledException>(async () => await query.PagingWrapAsync(0, 10, cts.Token));
+        Assert.ThrowsAsync<OperationCanceledException>(async () => await query.PagingWrapAsync(0, 10, cancellationToken: cts.Token));
+    }
+
+    #endregion
+
+    #region HasNextPage Tests (Normal Mode)
+
+    [Test]
+    public async Task PagingWrapAsync_NormalMode_FirstPage_HasNextPageTrue()
+    {
+        var query = _context.TestEntities.OrderBy(e => e.Id);
+        var result = await query.PagingWrapAsync(0, 10);
+
+        Assert.That(result.HasNextPage, Is.True);
+    }
+
+    [Test]
+    public async Task PagingWrapAsync_NormalMode_LastPage_HasNextPageFalse()
+    {
+        var query = _context.TestEntities.OrderBy(e => e.Id);
+        var result = await query.PagingWrapAsync(9, 10);
+
+        Assert.That(result.HasNextPage, Is.False);
+    }
+
+    [Test]
+    public async Task ToPagingWithEnumerableListAsync_PropagatesHasNextPage()
+    {
+        var query = _context.TestEntities.OrderBy(e => e.Id);
+        var pagingQueryable = await query.PagingWrapAsync(0, 10);
+        var result = await pagingQueryable.ToPagingWithEnumerableListAsync();
+
+        Assert.That(result.HasNextPage, Is.True);
+    }
+
+    #endregion
+
+    #region SkipCount Mode Tests
+
+    [Test]
+    public async Task PagingWrapAsync_SkipCount_FirstPage_HasNextPageTrue()
+    {
+        var query = _context.TestEntities.OrderBy(e => e.Id);
+        var result = await query.PagingWrapAsync(0, 10, PagingCountMode.SkipCount);
+
+        Assert.That(result.HasNextPage, Is.True);
+        Assert.That(result.Total, Is.EqualTo(-1));
+        var list = result.List.ToList();
+        Assert.That(list.Count, Is.EqualTo(10));
+        Assert.That(list.First().Id, Is.EqualTo(1));
+        Assert.That(list.Last().Id, Is.EqualTo(10));
+    }
+
+    [Test]
+    public async Task PagingWrapAsync_SkipCount_LastPage_HasNextPageFalse()
+    {
+        var query = _context.TestEntities.OrderBy(e => e.Id);
+        var result = await query.PagingWrapAsync(9, 10, PagingCountMode.SkipCount);
+
+        Assert.That(result.HasNextPage, Is.False);
+        Assert.That(result.Total, Is.EqualTo(-1));
+        var list = result.List.ToList();
+        Assert.That(list.Count, Is.EqualTo(10));
+        Assert.That(list.First().Id, Is.EqualTo(91));
+        Assert.That(list.Last().Id, Is.EqualTo(100));
+    }
+
+    [Test]
+    public async Task PagingWrapAsync_SkipCount_EmptyTable_HasNextPageFalse()
+    {
+        _context.TestEntities.RemoveRange(_context.TestEntities);
+        await _context.SaveChangesAsync();
+        var query = _context.TestEntities.OrderBy(e => e.Id);
+
+        var result = await query.PagingWrapAsync(0, 10, PagingCountMode.SkipCount);
+
+        Assert.That(result.HasNextPage, Is.False);
+        Assert.That(result.Total, Is.EqualTo(-1));
+        var list = result.List.ToList();
+        Assert.That(list.Count, Is.EqualTo(0));
+    }
+
+    [Test]
+    public async Task PagingWrapAsync_SkipCount_NegativePageIndex_ClampsToZero()
+    {
+        var query = _context.TestEntities.OrderBy(e => e.Id);
+        var result = await query.PagingWrapAsync(-5, 10, PagingCountMode.SkipCount);
+
+        Assert.That(result.PageIndex, Is.EqualTo(0));
+        var list = result.List.ToList();
+        Assert.That(list.First().Id, Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task PagingWrapWithEnumerableListAsync_SkipCount_FirstPage_HasNextPageTrue()
+    {
+        var query = _context.TestEntities.OrderBy(e => e.Id);
+        var result = await query.PagingWrapWithEnumerableListAsync(0, 10, PagingCountMode.SkipCount);
+
+        Assert.That(result.HasNextPage, Is.True);
+        Assert.That(result.Total, Is.EqualTo(-1));
+        Assert.That(result.List.Count(), Is.EqualTo(10));
+        Assert.That(result.List, Is.TypeOf<List<TestEntity>>());
+    }
+
+    [Test]
+    public async Task PagingWrapWithEnumerableListAsync_SkipCount_LastPage_HasNextPageFalse()
+    {
+        var query = _context.TestEntities.OrderBy(e => e.Id);
+        var result = await query.PagingWrapWithEnumerableListAsync(9, 10, PagingCountMode.SkipCount);
+
+        Assert.That(result.HasNextPage, Is.False);
+        Assert.That(result.Total, Is.EqualTo(-1));
+        Assert.That(result.List.Count(), Is.EqualTo(10));
+    }
+
+    [Test]
+    public async Task PagingWrapAsync_SkipCount_WithCancellationToken_CompletesSuccessfully()
+    {
+        var query = _context.TestEntities.OrderBy(e => e.Id);
+        var cts = new CancellationTokenSource();
+
+        var result = await query.PagingWrapAsync(0, 10, PagingCountMode.SkipCount, cts.Token);
+
+        Assert.That(result.HasNextPage, Is.True);
+        Assert.That(result.Total, Is.EqualTo(-1));
     }
 
     #endregion

@@ -174,4 +174,46 @@ public class PagingHelperTests
     }
 
     #endregion
+
+    #region CalculateHasNextPage Tests
+
+    [Test]
+    public void CalculateHasNextPage_MiddlePage_ReturnsTrue()
+    {
+        Assert.That(PagingHelper.CalculateHasNextPage(0, 10, 100), Is.True);
+    }
+
+    [Test]
+    public void CalculateHasNextPage_LastPage_ReturnsFalse()
+    {
+        // 100 items, page size 10, page index 9 => last page
+        Assert.That(PagingHelper.CalculateHasNextPage(9, 10, 100), Is.False);
+    }
+
+    [Test]
+    public void CalculateHasNextPage_ExactlyFillsLastPage_ReturnsFalse()
+    {
+        // 20 items, page size 10, page index 1 => (1+1)*10 = 20 == 20
+        Assert.That(PagingHelper.CalculateHasNextPage(1, 10, 20), Is.False);
+    }
+
+    [Test]
+    public void CalculateHasNextPage_EmptyCollection_ReturnsFalse()
+    {
+        Assert.That(PagingHelper.CalculateHasNextPage(0, 10, 0), Is.False);
+    }
+
+    [Test]
+    public void CalculateHasNextPage_SinglePage_ReturnsFalse()
+    {
+        Assert.That(PagingHelper.CalculateHasNextPage(0, 10, 5), Is.False);
+    }
+
+    [Test]
+    public void CalculateHasNextPage_ZeroPageSize_ReturnsFalse()
+    {
+        Assert.That(PagingHelper.CalculateHasNextPage(0, 0, 100), Is.False);
+    }
+
+    #endregion
 }

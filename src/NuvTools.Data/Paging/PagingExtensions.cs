@@ -1,4 +1,6 @@
-﻿namespace NuvTools.Data.Paging;
+using NuvTools.Data.Paging.Enumerations;
+
+namespace NuvTools.Data.Paging;
 
 /// <summary>
 /// Extension methods for paging collections.
@@ -13,16 +15,35 @@ public static class PagingExtensions
     /// <param name="list">The source enumerable collection.</param>
     /// <param name="pageIndex">The page index (0-indexed). Defaults to 0.</param>
     /// <param name="pageSize">The number of items per page. Defaults to 50.</param>
+    /// <param name="countMode">The count mode. Use <see cref="PagingCountMode.SkipCount"/> to avoid counting for large datasets.</param>
     /// <returns>A paged result containing the requested page of data with total count.</returns>
-    public static PagingWithEnumerableList<T> PagingWrap<T>(this IEnumerable<T> list, int pageIndex = 0, int pageSize = 50)
+    public static PagingWithEnumerableList<T> PagingWrap<T>(this IEnumerable<T> list, int pageIndex = 0, int pageSize = 50, PagingCountMode countMode = PagingCountMode.Normal)
     {
+        if (countMode == PagingCountMode.SkipCount)
+        {
+            if (pageIndex < 0) pageIndex = 0;
+
+            var skip = PagingHelper.GetSkip(pageIndex, pageSize);
+            var items = list.Skip(skip).Take(pageSize + 1).ToList();
+            var hasNext = items.Count > pageSize;
+
+            return new PagingWithEnumerableList<T>
+            {
+                List = hasNext ? items.Take(pageSize) : items,
+                PageIndex = pageIndex,
+                Total = -1,
+                HasNextPage = hasNext
+            };
+        }
+
         var total = list.Count();
         var validPageIndex = PagingHelper.GetPageIndex(pageIndex, pageSize, total);
         return new PagingWithEnumerableList<T>
         {
             List = list.Paging(validPageIndex, pageSize),
             PageIndex = validPageIndex,
-            Total = total
+            Total = total,
+            HasNextPage = PagingHelper.CalculateHasNextPage(validPageIndex, pageSize, total)
         };
     }
 
@@ -62,7 +83,8 @@ public static class PagingExtensions
         {
             List = [.. paging.List],
             PageIndex = paging.PageIndex,
-            Total = paging.Total
+            Total = paging.Total,
+            HasNextPage = paging.HasNextPage
         };
     }
 

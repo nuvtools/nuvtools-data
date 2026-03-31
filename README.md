@@ -192,6 +192,40 @@ public async Task<PagingWithEnumerableList<Product>> GetProductsAsync(int pageIn
 }
 ```
 
+### SkipCount Mode for Large Datasets
+
+For large datasets where `COUNT(*)` is too slow, use `PagingCountMode.SkipCount` to skip the count query. Instead of counting all rows, it fetches one extra item to determine if a next page exists:
+
+```csharp
+using NuvTools.Data.EntityFrameworkCore.Paging;
+using NuvTools.Data.Paging.Enumerations;
+
+public async Task<PagingWithEnumerableList<Product>> GetProductsAsync(int pageIndex, int pageSize)
+{
+    var query = _context.Products.Where(p => p.IsActive).OrderBy(p => p.Id);
+
+    // SkipCount: no COUNT(*) query, uses N+1 trick to detect next page
+    var pagedResult = await query.PagingWrapWithEnumerableListAsync(
+        pageIndex, pageSize, PagingCountMode.SkipCount);
+
+    // pagedResult.HasNextPage  => true if more items exist
+    // pagedResult.Total        => -1 (unknown)
+    return pagedResult;
+}
+```
+
+The `PagingFilter` class also supports `CountMode`, making it easy to pass from the UI:
+
+```csharp
+var filter = new PagingFilter<ProductSortColumn>
+{
+    PageIndex = 0,
+    PageSize = 25,
+    SortColumn = ProductSortColumn.Name,
+    CountMode = PagingCountMode.SkipCount  // Skip expensive COUNT(*)
+};
+```
+
 ### Bulk Operations
 
 ```csharp
@@ -244,6 +278,15 @@ dotnet build NuvTools.Data.slnx -c Release
 Packages are automatically generated in `bin/Release` folders when building in Release configuration.
 
 ## 📝 Version History
+
+### Version 10.1.4
+- **New Feature**: `PagingCountMode.SkipCount` to skip expensive `COUNT(*)` queries on large datasets
+- **New Feature**: `HasNextPage` property on all paging results for infinite scroll / forward-only navigation
+- **New**: `PagingCountMode` enum (`Normal`, `SkipCount`) in `NuvTools.Data.Paging.Enumerations`
+- **New**: `CountMode` property on `PagingFilter` (defaults to `Normal`)
+- **New**: `PagingHelper.CalculateHasNextPage()` helper method
+- **Breaking Change**: `PagingHelper.GetSkip()` changed from `internal` to `public`
+- **Breaking Change**: `PagingWrapAsync` and `PagingWrapWithEnumerableListAsync` have a new `countMode` parameter before `cancellationToken`. Callers passing `CancellationToken` positionally must switch to named parameter: `cancellationToken: token`
 
 ### Version 10.1.0
 - **Breaking Change**: Paging system migrated from 1-based `PageNumber` to 0-based `PageIndex`

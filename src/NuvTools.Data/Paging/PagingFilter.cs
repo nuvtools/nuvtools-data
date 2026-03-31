@@ -1,4 +1,5 @@
-﻿using NuvTools.Data.Sorting.Enumerations;
+﻿using NuvTools.Data.Paging.Enumerations;
+using NuvTools.Data.Sorting.Enumerations;
 
 namespace NuvTools.Data.Paging;
 
@@ -16,6 +17,12 @@ public class PagingFilter
     /// Gets or sets the number of items per page. Defaults to 30.
     /// </summary>
     public int PageSize { get; set; } = 30;
+
+    /// <summary>
+    /// Gets or sets the count mode for paging operations. Defaults to <see cref="PagingCountMode.Normal"/>.
+    /// Use <see cref="PagingCountMode.SkipCount"/> for large datasets where COUNT(*) is too slow.
+    /// </summary>
+    public PagingCountMode CountMode { get; set; } = PagingCountMode.Normal;
 }
 
 /// <summary>

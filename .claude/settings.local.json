@@ -4,7 +4,16 @@
       "WebSearch",
       "Bash(find:*)",
       "Bash(dotnet build:*)",
-      "Bash(dotnet test:*)"
+      "Bash(dotnet test:*)",
+      "Bash(grep -r \"TableState\\\\|TableData\" D:ProjectsNuvToolsFrameworknuvtools-aspnetcoresrc --include=*.cs)",
+      "Bash(xargs grep:*)",
+      "Bash(grep -r PagingWithEnumerableList D:ProjectsNuvToolsFrameworknuvtools-aspnetcore --include=*.cs)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.mudblazor.com)",
+      "Bash(dotnet pack:*)",
+      "Bash(dotnet nuget:*)",
+      "Bash(rm -rf \"C:\\\\Users\\\\BrunodeSouzaMelo\\\\.nuget\\\\packages\\\\nuvtools.data\\\\10.1.0\")",
+      "Bash(dotnet restore:*)"
     ],
     "deny": [],
     "ask": []

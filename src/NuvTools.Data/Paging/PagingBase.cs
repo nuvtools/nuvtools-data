@@ -21,4 +21,9 @@ public abstract class PagingBase<T, R> where T : IEnumerable<R>
     /// Gets or sets the collection of items for the current page.
     /// </summary>
     public required T List { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether there are more items beyond the current page.
+    /// </summary>
+    public bool HasNextPage { get; set; }
 }
