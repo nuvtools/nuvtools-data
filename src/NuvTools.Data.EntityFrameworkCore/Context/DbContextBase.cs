@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using NuvTools.Common.ResultWrapper;
 using System.Linq.Expressions;
 
@@ -67,28 +66,8 @@ public abstract class DbContextBase : DbContext, IDbContextCommands, IDbContextW
     /// <inheritdoc />
     public Task AcquireTransactionLockAsync(string name, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-
-        // The statement is provider-specific and lives in the provider package, registered by its AddDatabase
-        // helpers. Nothing registered means no provider package is in play — an in-memory context built by hand
-        // in a test, typically — and there is no concurrency to serialize, so the call is a no-op.
-        if (ApplicationServiceProvider?.GetService(typeof(IDbContextTransactionLock)) is not IDbContextTransactionLock lockService)
-            return Task.CompletedTask;
-
-        if (Database.CurrentTransaction is null)
-            throw new InvalidOperationException(
-                $"AcquireTransactionLockAsync('{name}') requires an active transaction: the lock is released when the " +
-                "transaction ends, so without one it would protect nothing. Call BeginTransactionAsync first.");
-
-        return lockService.AcquireAsync(this, name, cancellationToken);
+        return Extensions.DbContextExtensions.AcquireTransactionLockAsync(this, name, cancellationToken);
     }
-
-    /// <summary>
-    /// The application's service provider, as captured by <c>AddDbContext</c>; null when the context was built
-    /// without dependency injection.
-    /// </summary>
-    private IServiceProvider? ApplicationServiceProvider
-        => this.GetService<IDbContextOptions>().FindExtension<CoreOptionsExtension>()?.ApplicationServiceProvider;
 
     /// <inheritdoc />
     public Task<IResult<TKey>> AddAndSaveAsync<TEntity, TKey>(TEntity entity, CancellationToken cancellationToken = default) where TEntity : class

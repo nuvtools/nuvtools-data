@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using NuvTools.Common.ResultWrapper;
+using NuvTools.Data.EntityFrameworkCore.Context;
 using NuvTools.Common.Strings;
 
 namespace NuvTools.Data.EntityFrameworkCore.Extensions;
@@ -8,6 +10,39 @@ public static class DbContextExtensions
 {
     private const string EntityWithKeysNotFound = "Entity with keys {0} not found.";
     private const string AtLeastOneKeyMustBeProvided = "At least one key value must be provided.";
+
+    /// <summary>
+    /// Acquires the exclusive lock named <paramref name="name"/>, held until the current transaction ends.
+    /// Backs <see cref="Context.IDbContextCommands.AcquireTransactionLockAsync"/>; any context base can delegate
+    /// here instead of repeating the lookup.
+    /// </summary>
+    /// <remarks>
+    /// The statement is provider-specific, so it comes from the <see cref="Context.IDbContextTransactionLock"/>
+    /// registered by the provider package (<c>AddDatabase</c>). With none registered — an in-memory context built
+    /// by hand in a test — there is no concurrency to serialize and the call does nothing.
+    /// </remarks>
+    /// <param name="context">The context whose transaction the lock belongs to.</param>
+    /// <param name="name">Lock name. Identifies what is being serialized, e.g. <c>"contract-number:53"</c>.</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+    /// <exception cref="InvalidOperationException">No transaction is active on <paramref name="context"/>.</exception>
+    public static Task AcquireTransactionLockAsync(this DbContext context, string name, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        var applicationServices = context.GetService<IDbContextOptions>()
+            .FindExtension<CoreOptionsExtension>()?.ApplicationServiceProvider;
+
+        if (applicationServices?.GetService(typeof(IDbContextTransactionLock)) is not IDbContextTransactionLock lockService)
+            return Task.CompletedTask;
+
+        if (context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException(
+                $"AcquireTransactionLockAsync('{name}') requires an active transaction: the lock is released when the " +
+                "transaction ends, so without one it would protect nothing. Begin a transaction first.");
+
+        return lockService.AcquireAsync(context, name, cancellationToken);
+    }
 
     public static async Task<IResult<TKey>> AddAndSaveAsync<TEntity, TKey>(this DbContext context, TEntity entity, CancellationToken cancellationToken = default) where TEntity : class
     {
