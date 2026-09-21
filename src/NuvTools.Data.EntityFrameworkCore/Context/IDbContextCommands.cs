@@ -63,6 +63,28 @@ public interface IDbContextCommands
     IDbContextTransaction? CurrentTransaction { get; }
 
     /// <summary>
+    /// Acquires an exclusive, database-wide lock identified by <paramref name="name"/>, held until the current
+    /// transaction commits or rolls back. Callers competing for the same name are serialized; different names
+    /// never block each other.
+    /// </summary>
+    /// <remarks>
+    /// <para>Use it to serialize a read-then-write that the schema alone cannot make atomic — allocating the next
+    /// value of a per-tenant sequence, for instance, where every writer reads the same maximum and collides on a
+    /// unique index. It is an advisory lock: it guards nothing by itself, only callers that ask for the same name.</para>
+    /// <para><b>A transaction must be active</b> (see <see cref="BeginTransactionAsync"/>). Without one the lock is
+    /// released as soon as the statement ends and protects nothing, so the call throws instead.</para>
+    /// <para>The statement itself lives in the provider package — <c>pg_advisory_xact_lock</c> in
+    /// <c>NuvTools.Data.EntityFrameworkCore.PostgreSQL</c>, <c>sp_getapplock</c> (LockOwner <c>Transaction</c>) in
+    /// <c>NuvTools.Data.EntityFrameworkCore.SqlServer</c> — behind <see cref="IDbContextTransactionLock"/>, and is
+    /// registered by that package's <c>AddDatabase</c> helpers. With no such package in play (an in-memory context
+    /// built by hand in a test) there is nothing to serialize and the call does nothing.</para>
+    /// </remarks>
+    /// <param name="name">Lock name. Identifies what is being serialized, e.g. <c>"contract-number:53"</c>.</param>
+    /// <param name="cancellationToken">A cancellation token to observe while waiting for the task to complete.</param>
+    /// <returns>A task that completes once the lock is held.</returns>
+    Task AcquireTransactionLockAsync(string name, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Adds a new entity to the database and saves changes, returning the entity's primary key.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>

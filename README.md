@@ -38,6 +38,8 @@ dotnet add package NuvTools.Data
 Extensions for Entity Framework Core:
 - **DbContextBase**: Base class with CRUD operations using Result pattern
 - **Transaction Management**: Built-in transaction support with rollback/commit
+- **Transaction Locks**: `AcquireTransactionLockAsync(name)` serializes competing writers across processes
+  (`pg_advisory_xact_lock` on PostgreSQL, `sp_getapplock` on SQL Server), released with the transaction
 - **Execution Strategies**: Connection resiliency with automatic retry
 - **Bulk Operations**: `SyncFromListAsync`, `AddOrUpdateFromListAsync`, `AddOrRemoveFromListAsync`
 - **Async Paging**: `PagingWrapAsync` for efficient database paging
@@ -175,6 +177,34 @@ public class ProductService
     }
 }
 ```
+
+### Serializing a read-then-write (DbContextBase)
+
+Allocating the next value of a per-tenant sequence is a read followed by a write, so every concurrent
+writer reads the same maximum and they collide on the unique index. An exclusive lock, held until the
+transaction ends, makes the pair atomic without changing the schema:
+
+```csharp
+using var transaction = await context.BeginTransactionAsync(cancellationToken);
+
+// Blocks only writers asking for this same name; other tenants keep running in parallel.
+await context.AcquireTransactionLockAsync($"invoice-number:{tenantId}", cancellationToken);
+
+invoice.Number = await context.Invoice
+    .Where(i => i.TenantId == tenantId)
+    .Select(i => i.Number)
+    .DefaultIfEmpty()
+    .MaxAsync(cancellationToken) + 1;
+
+context.Invoice.Add(invoice);
+await context.SaveChangesAsync(cancellationToken);
+await transaction.CommitAsync(cancellationToken);   // releases the lock
+```
+
+A abstração (`IDbContextTransactionLock`) fica em `NuvTools.Data.EntityFrameworkCore` e cada pacote de
+provider traz a sua implementação — `pg_advisory_xact_lock` em `...PostgreSQL`, `sp_getapplock` em
+`...SqlServer` —, registrada automaticamente pelos helpers `AddDatabase`/`AddDatabaseByConnectionName`.
+Sem nenhum provider registrado (contexto em memória montado à mão, nos testes) a chamada é inócua.
 
 ### Async Paging with EF Core
 

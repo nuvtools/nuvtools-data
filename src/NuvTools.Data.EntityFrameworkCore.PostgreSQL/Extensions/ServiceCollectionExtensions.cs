@@ -2,6 +2,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using NuvTools.Data.EntityFrameworkCore.Context;
+using NuvTools.Data.EntityFrameworkCore.PostgreSQL.Context;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 
 namespace NuvTools.Data.EntityFrameworkCore.PostgreSQL.Extensions;
@@ -91,6 +94,10 @@ public static class ServiceCollectionExtensions
         Action<NpgsqlDbContextOptionsBuilder>? npgsqlOptionsAction = null,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
+        // Transaction lock used by IDbContextCommands.AcquireTransactionLockAsync; resolved by DbContextBase
+        // from the application service provider.
+        services.TryAddSingleton<IDbContextTransactionLock, PostgreSqlTransactionLock>();
+
         return services
             .AddDbContext<TContext>(options => options.UseNpgsql(connectionString, npgsqlOptionsAction),
                                     contextLifetime: contextLifetime);

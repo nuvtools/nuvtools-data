@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using NuvTools.Data.EntityFrameworkCore.Context;
+using NuvTools.Data.EntityFrameworkCore.SqlServer.Context;
 
 namespace NuvTools.Data.EntityFrameworkCore.SqlServer.Extensions;
 
@@ -91,6 +94,10 @@ public static class ServiceCollectionExtensions
         Action<SqlServerDbContextOptionsBuilder>? sqlServerOptionsAction = null,
         ServiceLifetime contextLifetime = ServiceLifetime.Scoped) where TContext : DbContext
     {
+        // Transaction lock used by IDbContextCommands.AcquireTransactionLockAsync; resolved by DbContextBase
+        // from the application service provider.
+        services.TryAddSingleton<IDbContextTransactionLock, SqlServerTransactionLock>();
+
         return services
             .AddDbContext<TContext>(options => options
                 .UseSqlServer(connectionString, sqlServerOptionsAction), contextLifetime: contextLifetime);
