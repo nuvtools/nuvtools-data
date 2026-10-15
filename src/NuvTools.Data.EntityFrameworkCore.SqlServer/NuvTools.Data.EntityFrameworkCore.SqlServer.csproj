@@ -21,6 +21,21 @@
 		<PackageTags>NuvTools Data EFCore EntityFrameworkCore SqlServer MSSQL DbContext DependencyInjection dotnet csharp</PackageTags>
 		<ImplicitUsings>true</ImplicitUsings>
 		<Nullable>enable</Nullable>
+
+		<!-- SourceLink: a stack trace from a consumer's process steps into the exact commit this
+		     package was built from. EmbedUntrackedSources covers the generated files, which are the
+		     ones a debugger otherwise cannot find. The .NET 8+ SDK has SourceLink built in, so no
+		     package reference is needed. -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<!-- Set by the publish workflow. Makes the build deterministic and marks the package as built by
+	     CI rather than on somebody's machine. -->
+	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -41,9 +56,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.20" Condition="'$(TargetFramework)' == 'net8' OR '$(TargetFramework)' == 'net9'" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" Condition="'$(TargetFramework)' == 'net10.0'" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.13" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.21" Condition="'$(TargetFramework)' == 'net8' OR '$(TargetFramework)' == 'net9'" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.13" Condition="'$(TargetFramework)' == 'net10.0'" />
+		<!-- Microsoft.Data.SqlClient still asks for a System.Security.Cryptography.Pkcs with known
+		     vulnerabilities, and an app outside ASP.NET Core ships whatever it asks for; this lifts it
+		     to the patched release. -->
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="9.0.21" Condition="'$(TargetFramework)' == 'net8' OR '$(TargetFramework)' == 'net9'" />
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" Condition="'$(TargetFramework)' == 'net10.0'" />
 	</ItemGroup>
 
 	<ItemGroup>

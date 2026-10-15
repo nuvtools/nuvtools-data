@@ -167,3 +167,13 @@ When modifying this codebase:
 - Use `ConfigureAwait(false)` in library code for async calls
 - Null validation via ArgumentNullException.ThrowIfNull for public APIs
 - Follow existing naming conventions (snake_case for PostgreSQL tables/columns via UseSnakeCaseNamingConvention)
+
+## CI and Releasing
+
+`.github/workflows/ci.yml` builds the solution in Release with `-warnaserror` and runs the tests on every push and pull request to `main`.
+
+Each package has its own manually-run publish workflow (`data-publish.yml`, `entityframeworkcore-publish.yml`, `postgresql-publish.yml` and `sqlserver-publish.yml`), calling the reusable `package-publish.yml`. It reads `<Version>` from the `.csproj` (never computes it), verifies the package, pushes through nuget.org trusted publishing behind the `nuget` environment, and then writes the release tag (`data-vX.Y.Z`, `entityframeworkcore-vX.Y.Z`, `postgresql-vX.Y.Z` and `sqlserver-vX.Y.Z`). See *Releasing* in the README.
+
+- A new package needs its own small workflow file and a row in the README table.
+- The SourceLink and symbol settings (`PublishRepositoryUrl`, `EmbedUntrackedSources`, `IncludeSymbols`, `snupkg`) must be in every packable project: the workflow fails a package without its `.snupkg`.
+- A package referenced as a project by another of this repository is published first; see *Releasing* in the README for the order.

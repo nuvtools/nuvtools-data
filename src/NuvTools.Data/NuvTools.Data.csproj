@@ -7,7 +7,7 @@
 		<Copyright>Copyright © 2026 Nuv Tools</Copyright>
 		<PackageProjectUrl>https://nuvtools.com</PackageProjectUrl>
 		<Description>ORM-agnostic .NET library for data manipulation with paging, sorting, and filtering utilities for IQueryable and IEnumerable collections.</Description>
-		<Version>10.1.9</Version>
+		<Version>10.1.10</Version>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<PackageIcon>icon.png</PackageIcon>
@@ -21,6 +21,21 @@
 		<PackageTags>NuvTools Data Paging Sorting Filtering IQueryable IEnumerable ORM-Agnostic dotnet csharp</PackageTags>
 		<ImplicitUsings>true</ImplicitUsings>
 		<Nullable>enable</Nullable>
+
+		<!-- SourceLink: a stack trace from a consumer's process steps into the exact commit this
+		     package was built from. EmbedUntrackedSources covers the generated files, which are the
+		     ones a debugger otherwise cannot find. The .NET 8+ SDK has SourceLink built in, so no
+		     package reference is needed. -->
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	</PropertyGroup>
+
+	<!-- Set by the publish workflow. Makes the build deterministic and marks the package as built by
+	     CI rather than on somebody's machine. -->
+	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
